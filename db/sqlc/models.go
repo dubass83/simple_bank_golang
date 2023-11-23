@@ -28,6 +28,6 @@ type Transfer struct {
 	FromAccountID sql.NullInt64 `json:"fromAccountID"`
 	ToAccountID   sql.NullInt64 `json:"toAccountID"`
 	// should be posetive
-	Ammount   int64     `json:"ammount"`
+	Amount    int64     `json:"amount"`
 	CreatedAt time.Time `json:"createdAt"`
 }
