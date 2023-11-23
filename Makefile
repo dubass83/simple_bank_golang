@@ -1,9 +1,11 @@
 postgresup:
+	colima start
 	docker run --name dev-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
 
 postgresdown:
 	docker stop dev-postgres
 	docker rm dev-postgres
+	colima stop
 
 createdb:
 	docker exec -it dev-postgres createdb -U postgres -O postgres simple_bank
@@ -23,4 +25,7 @@ migratedown:
 sqlc:
 	sqlc generate
 
-.PHONY: createdb dropdb postgresup postgresdown migratedown migrateup sqlc
+test:
+	go test -v -cover ./...
+
+.PHONY: createdb dropdb postgresup postgresdown migratedown migrateup sqlc test
