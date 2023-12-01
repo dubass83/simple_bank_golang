@@ -18,6 +18,7 @@ func NewStore(db *sql.DB) *Store {
 	}
 }
 
+// execTx private method which will run transaction
 func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 	tx, err := store.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -36,12 +37,14 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 	return tx.Commit()
 }
 
+// TransferTxParams struct with arguments for TransferTx function
 type TransferTxParams struct {
 	FromAccountID int64 `json:"from_account_id"`
 	ToAccountID   int64 `json:"to_account_id"`
 	Ammount       int64 `json:"ammount"`
 }
 
+// TransferTxResults struct with results from TransferTx function
 type TransferTxResult struct {
 	Transfer    Transfer `json:"transfer"`
 	FromAccount Account  `json:"from_account"`
@@ -50,6 +53,7 @@ type TransferTxResult struct {
 	ToEntry     Entry    `json:"to_entry"`
 }
 
+// TransferTx public method to crete new transfer in transaction
 func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
 
@@ -92,7 +96,31 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 			return err
 		}
 
-		// TODO: Update accounts
+		// toAccount, err2 := q.GetAccountForUpdate(ctx, arg.ToAccountID)
+		// if err2 != nil {
+		// 	return err2
+		// }
+
+		result.ToAccount, err = q.AddToAccountBalance(ctx, AddToAccountBalanceParams{
+			ID:     arg.ToAccountID,
+			Amount: arg.Ammount,
+		})
+		if err != nil {
+			return err
+		}
+
+		// fromAccount, err1 := q.GetAccountForUpdate(ctx, arg.FromAccountID)
+		// if err1 != nil {
+		// 	return err1
+		// }
+
+		result.FromAccount, err = q.AddToAccountBalance(ctx, AddToAccountBalanceParams{
+			ID:     arg.FromAccountID,
+			Amount: -arg.Ammount,
+		})
+		if err != nil {
+			return err
+		}
 
 		return nil
 	})
