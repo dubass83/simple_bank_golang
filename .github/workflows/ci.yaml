@@ -45,7 +45,7 @@ jobs:
       - name: Make migrations
         run: make migrateup
       - name: Test with the Go CLI
-        env:
-          POSTGRES_HOST: postgres
-          POSTGRES_PORT: 5432
+        # env:
+        #   POSTGRES_HOST: postgres
+        #   POSTGRES_PORT: 5432
         run: make test
