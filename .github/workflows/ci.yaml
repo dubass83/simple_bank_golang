@@ -39,7 +39,7 @@ jobs:
         run: go build -v ./...
       - name: Install migrate CLI 
         run: |
-          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.16.2/migrate.linux-amd64.deb | tar xvz
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.16.2/migrate.linux-amd64.tar.gz | tar xvz
           sudo mv migrate.linux-amd64 /usr/local/bin/migrate
           which migrate
       - name: Make migrations
