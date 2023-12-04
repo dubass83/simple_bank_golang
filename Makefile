@@ -30,7 +30,10 @@ migratedown:
 sqlc:
 	sqlc generate
 
-test: postgresup createdb migrateup
+test:
+	go test -v -cover ./...
+
+runtest: postgresup createdb migrateup
 	go test -v -cover ./...
 
 clean: postgresdown
