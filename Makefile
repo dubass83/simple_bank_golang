@@ -37,3 +37,6 @@ runtest: postgresup createdb migrateup
 	go test -v -cover ./...
 
 clean: postgresdown
+
+server:
+	go run main.go
