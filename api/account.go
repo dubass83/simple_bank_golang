@@ -122,3 +122,27 @@ func (srv *Server) updateAccount(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, account)
 }
+
+type deleteAccountId struct {
+	Id int64 `uri:"id" binding:"required,min=1"`
+}
+
+func (srv *Server) deleteAccount(ctx *gin.Context) {
+	var reqUri updateAccountId
+	err := ctx.ShouldBindUri(&reqUri)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	err = srv.store.DeleteAccount(ctx, reqUri.Id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"accout was deleted": reqUri.Id})
+}
