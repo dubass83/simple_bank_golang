@@ -83,3 +83,42 @@ func (srv *Server) listAccount(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, accounts)
 }
+
+type updateAccountRequest struct {
+	Balance int64 `json:"balance" binding:"required,min=0"`
+}
+
+type updateAccountId struct {
+	Id int64 `uri:"id" binding:"required,min=1"`
+}
+
+func (srv *Server) updateAccount(ctx *gin.Context) {
+	var reqPost updateAccountRequest
+	err := ctx.ShouldBindJSON(&reqPost)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	var reqUri updateAccountId
+	err = ctx.ShouldBindUri(&reqUri)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	arg := db.UpdateAccountParams{
+		ID:      reqUri.Id,
+		Balance: reqPost.Balance,
+	}
+
+	account, err := srv.store.UpdateAccount(ctx, arg)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, account)
+}
