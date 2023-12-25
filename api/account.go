@@ -124,11 +124,11 @@ func (srv *Server) updateAccount(ctx *gin.Context) {
 }
 
 type deleteAccountId struct {
-	Id int64 `uri:"id" binding:"required,min=1"`
+	Id int64 `uri:"id" binding:"required,min=2"`
 }
 
 func (srv *Server) deleteAccount(ctx *gin.Context) {
-	var reqUri updateAccountId
+	var reqUri deleteAccountId
 	err := ctx.ShouldBindUri(&reqUri)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
