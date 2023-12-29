@@ -156,12 +156,11 @@ func TestCreateAccount(t *testing.T) {
 			recorder := httptest.NewRecorder()
 
 			url := "/accounts"
-
+			// convert map to json
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
 			reqest, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
-			reqest.Header.Set("Content-Type", "application/json; charset=UTF-8")
 			require.NoError(t, err)
 
 			server.router.ServeHTTP(recorder, reqest)
