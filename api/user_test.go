@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	mockdb "github.com/dubass83/simplebank/db/mock"
@@ -17,6 +18,33 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
+
+type eqCreateUserParamMatcher struct {
+	arg      db.CreateUserParams
+	password string
+}
+
+func (e eqCreateUserParamMatcher) Matches(x any) bool {
+	arg, ok := x.(db.CreateUserParams)
+	if !ok {
+		return false
+	}
+	err := util.CheckPassword(e.password, arg.HashedPassword)
+	if err != nil {
+		return false
+	}
+	e.arg.HashedPassword = arg.HashedPassword
+
+	return reflect.DeepEqual(e.arg, arg)
+}
+
+func (e eqCreateUserParamMatcher) String() string {
+	return fmt.Sprintf("is argument %v and password %s", e.arg, e.password)
+}
+
+func eqCreateUserParam(arg db.CreateUserParams, pass string) gomock.Matcher {
+	return eqCreateUserParamMatcher{arg, pass}
+}
 
 func TestGetUserAPI(t *testing.T) {
 	user, _ := randomUser()
@@ -133,8 +161,13 @@ func TestCreateUserAPI(t *testing.T) {
 				"email":     user.Email,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.CreateUserParams{
+					Username: user.Username,
+					FullName: user.FullName,
+					Email:    user.Email,
+				}
 				store.EXPECT().
-					CreateUser(gomock.Any(), gomock.Any()).
+					CreateUser(gomock.Any(), eqCreateUserParam(arg, password)).
 					Times(1).
 					Return(user, nil)
 			},
