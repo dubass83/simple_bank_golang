@@ -19,7 +19,7 @@ import (
 )
 
 func TestGetUserAPI(t *testing.T) {
-	user := randomUser()
+	user, _ := randomUser()
 
 	testCases := []struct {
 		name          string
@@ -116,8 +116,7 @@ func TestGetUserAPI(t *testing.T) {
 }
 
 func TestCreateUserAPI(t *testing.T) {
-	user := randomUser()
-	password := util.RandomString(8)
+	user, password := randomUser()
 
 	testCases := []struct {
 		name          string
@@ -163,6 +162,24 @@ func TestCreateUserAPI(t *testing.T) {
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "ForbidenError",
+			body: gin.H{
+				"username":  user.Username,
+				"password":  password,
+				"full_name": user.FullName,
+				"email":     user.Email,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					CreateUser(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return(db.User{}, db.ErrUniqueViolation)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusForbidden, recorder.Code)
 			},
 		},
 		{
@@ -217,13 +234,21 @@ func TestCreateUserAPI(t *testing.T) {
 	}
 }
 
-func randomUser() db.User {
-	return db.User{
+func randomUser() (db.User, string) {
+	password := util.RandomString(8)
+	hash, err := util.HashPassword(password)
+	if err != nil {
+		return db.User{}, ""
+	}
+
+	user := db.User{
 		Username:       util.RandomOwner(),
-		HashedPassword: util.RandomString(12),
+		HashedPassword: hash,
 		FullName:       util.RandomOwner(),
 		Email:          util.RandomEmail(),
 	}
+
+	return user, password
 }
 
 func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, uResp userResponse) {
