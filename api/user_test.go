@@ -10,9 +10,11 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
 	mockdb "github.com/dubass83/simplebank/db/mock"
 	db "github.com/dubass83/simplebank/db/sqlc"
+	"github.com/dubass83/simplebank/token"
 	"github.com/dubass83/simplebank/util"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
@@ -52,12 +54,16 @@ func TestGetUserAPI(t *testing.T) {
 	testCases := []struct {
 		name          string
 		username      string
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name:     "OK",
 			username: user.Username,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				AddAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Eq(user.Username)).
@@ -76,6 +82,9 @@ func TestGetUserAPI(t *testing.T) {
 		{
 			name:     "NotFound",
 			username: "notFound",
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				AddAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Eq("notFound")).
@@ -89,6 +98,9 @@ func TestGetUserAPI(t *testing.T) {
 		{
 			name:     "BadRequest",
 			username: "b@du$#r",
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				AddAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
@@ -101,6 +113,9 @@ func TestGetUserAPI(t *testing.T) {
 		{
 			name:     "InternalServerError",
 			username: user.Username,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				AddAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Eq(user.Username)).
@@ -133,6 +148,8 @@ func TestGetUserAPI(t *testing.T) {
 
 			reqest, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
+
+			tc.setupAuth(t, reqest, server.tokenMaker)
 
 			server.router.ServeHTTP(recorder, reqest)
 			// check return status code
