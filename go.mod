@@ -1,6 +1,6 @@
 module github.com/dubass83/simplebank
 
-go 1.21.4
+go 1.21.6
 
 require (
 	github.com/aead/chacha20poly1305 v0.0.0-20201124145622-1a5aba2a8b29
