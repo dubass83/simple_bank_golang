@@ -48,3 +48,6 @@ server:
 
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/dubass83/simplebank/db/sqlc Store
+
+build:
+	docker build -t simple-bank -f Dockerfile
