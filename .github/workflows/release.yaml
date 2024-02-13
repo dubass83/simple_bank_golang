@@ -48,5 +48,4 @@ jobs:
         run: |
           docker buildx build --push \
             --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            --label ${{ steps.meta.outputs.labels }} \
             --platform linux/amd64,linux/arm64 .
