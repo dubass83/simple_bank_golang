@@ -1,5 +1,12 @@
 .PHONY: *
 DOCKER_NAME = dev-postgres
+
+dockerup:
+	limactl start docker
+
+dockerdown: 
+	limactl stop docker
+
 postgresup:
 	docker run --name ${DOCKER_NAME} -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
 	sleep 5
