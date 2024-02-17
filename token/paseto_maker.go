@@ -28,18 +28,18 @@ func NewPasetoMaker(secretKey string) (Maker, error) {
 }
 
 // CreateToken create new token for username and duration
-func (maker PasetoMaker) CreateToken(username string, duration time.Duration) (string, error) {
+func (maker PasetoMaker) CreateToken(username string, duration time.Duration) (string, *Payload, error) {
 	payload, err := NewPayload(username, duration)
 	if err != nil {
-		return "", err
+		return "", payload, err
 	}
 
 	// Encrypt data
 	token, err := maker.paseto.Encrypt(maker.secreKey, payload, nil)
 	if err != nil {
-		return "", err
+		return "", payload, err
 	}
-	return token, nil
+	return token, payload, nil
 }
 
 // VerifyToken check is token valid or not
