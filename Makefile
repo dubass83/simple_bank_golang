@@ -8,8 +8,7 @@ dockerdown:
 	limactl stop docker
 
 postgresup:
-	docker run --name ${DOCKER_NAME} -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
-	sleep 5
+	docker start ${DOCKER_NAME} || docker run --name ${DOCKER_NAME} -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
 
 postgresdown:
 	docker stop ${DOCKER_NAME}
