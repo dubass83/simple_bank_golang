@@ -53,3 +53,9 @@ mock:
 
 build:
 	docker build -t simple-bank -f Dockerfile
+
+proto:
+	rm -f pb/*
+	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
+      --go-grpc_out=pb --go-grpc_opt=paths=source_relative \
+      proto/*.proto
