@@ -11,7 +11,8 @@ import (
 type Config struct {
 	DBDriver             string        `mapstructure:"DB_DRIVER"`
 	DBSource             string        `mapstructure:"DB_SOURCE"`
-	AddressString        string        `mapstructure:"ADDRESS_STRING"`
+	HTTPAddressString    string        `mapstructure:"HTTP_ADDRESS_STRING"`
+	GRPCAddressString    string        `mapstructure:"GRPC_ADDRESS_STRING"`
 	TokenString          string        `mapstructure:"TOKEN_STRING"`
 	TokenDuration        time.Duration `mapstructure:"TOKEN_DURATION"`
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
