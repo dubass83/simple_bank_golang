@@ -55,6 +55,38 @@
         ]
       }
     },
+    "/v1/get_user/{username}": {
+      "get": {
+        "summary": "Get User",
+        "description": "Get user if it exist",
+        "operationId": "SimpleBank_GetUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbGetUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "SimpleBank"
+        ]
+      }
+    },
     "/v1/login_user": {
       "post": {
         "summary": "Login User",
@@ -109,6 +141,14 @@
       }
     },
     "pbCreateUserResponse": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/pbUser"
+        }
+      }
+    },
+    "pbGetUserResponse": {
       "type": "object",
       "properties": {
         "user": {

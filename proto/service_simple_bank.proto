@@ -5,6 +5,7 @@ package pb;
 import "google/api/annotations.proto";
 import "rpc_create_user.proto";
 import "rpc_login_user.proto";
+import "rpc_get_user.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
  
 option go_package = "github.com/dubass83/simplebank/pb";
@@ -50,4 +51,13 @@ service SimpleBank {
           summary: "Login User";
         };
     }
+    rpc GetUser (GetUserRequest) returns (GetUserResponse){
+      option (google.api.http) = {
+          get: "/v1/get_user/{username}"
+      };
+      option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+        description: "Get user if it exist";
+        summary: "Get User";
+      };
+  }
 }
