@@ -6,6 +6,7 @@ import "google/api/annotations.proto";
 import "rpc_create_user.proto";
 import "rpc_login_user.proto";
 import "rpc_get_user.proto";
+import "rpc_create_account.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
  
 option go_package = "github.com/dubass83/simplebank/pb";
@@ -31,33 +32,43 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 
 service SimpleBank {
-    rpc CreateUser (CreateUserRequest) returns (CreateUserResponse){
-        option (google.api.http) = {
-            post: "/v1/create_user"
-            body: "*"
-        };
-        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-          description: "Use this API to create a new user";
-          summary: "Create User";
-        };
-    }
-    rpc LoginUser (LoginUserRequest) returns (LoginUserResponse){
-        option (google.api.http) = {
-            post: "/v1/login_user"
-            body: "*"
-        };
-        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-          description: "Create access and refresh tokens";
-          summary: "Login User";
-        };
-    }
-    rpc GetUser (GetUserRequest) returns (GetUserResponse){
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse){
       option (google.api.http) = {
-          get: "/v1/get_user/{username}"
+          post: "/v1/create_user"
+          body: "*"
       };
       option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-        description: "Get user if it exist";
-        summary: "Get User";
+        description: "Use this API to create a new user";
+        summary: "Create User";
       };
+  }
+  rpc LoginUser (LoginUserRequest) returns (LoginUserResponse){
+      option (google.api.http) = {
+          post: "/v1/login_user"
+          body: "*"
+      };
+      option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+        description: "Create access and refresh tokens";
+        summary: "Login User";
+      };
+  }
+  rpc GetUser (GetUserRequest) returns (GetUserResponse){
+    option (google.api.http) = {
+        get: "/v1/get_user/{username}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      description: "Get user if it exist";
+      summary: "Get User";
+    };
+  }
+  rpc CreateAccount (CreateAccountRequest) returns (CreateAccountResponse){
+    option (google.api.http) = {
+      post: "/v1/create_account"
+      body: "*"
+  };
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+    description: "Create user account with curency param sending at the body request (UAH|USD|EUR)";
+    summary: "Create user account";
+  };
   }
 }
