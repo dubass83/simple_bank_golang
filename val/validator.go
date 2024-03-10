@@ -33,7 +33,7 @@ func ValidateFullname(fullName string) error {
 	if err := validateString(fullName, 4, 100); err != nil {
 		return err
 	}
-	if isValidFullName(fullName) {
+	if !isValidFullName(fullName) {
 		return fmt.Errorf("must contain only letters and spaces")
 	}
 	return nil
