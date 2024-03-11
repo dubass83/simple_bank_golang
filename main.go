@@ -13,6 +13,9 @@ import (
 	"github.com/dubass83/simplebank/gapi"
 	"github.com/dubass83/simplebank/pb"
 	"github.com/dubass83/simplebank/util"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	_ "github.com/lib/pq"
 	"github.com/rakyll/statik/fs"
@@ -29,11 +32,26 @@ func main() {
 
 	conn, err := sql.Open(conf.DBDriver, conf.DBSource)
 	if err != nil {
-		log.Fatal("can not connect to db:", err)
+		log.Fatal("cannot connect to db:", err)
 	}
 	store := db.NewStore(conn)
+
+	runDbMigration(conf.MigrationURL, conf.DBSource)
+
 	go runGateWayServer(conf, store)
 	runGRPCServer(conf, store)
+}
+
+// runDbMigration run db migration from provided URL to the db
+func runDbMigration(migrationURL, dbSource string) {
+	m, err := migrate.New(migrationURL, dbSource)
+	if err != nil {
+		log.Fatal("cannot create migration instance: ", err)
+	}
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatal("cannot run migration up: ", err)
+	}
+	log.Println("successfully run db migration")
 }
 
 // runGateWayServer run Gateway server
