@@ -30,7 +30,7 @@ func (srv *Server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.Get
 }
 
 func validateGetUserRequest(req *pb.GetUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
-	if err := val.ValidateUsername(req.Username); err != nil {
+	if err := val.ValidateUsername(req.GetUsername()); err != nil {
 		violations = append(violations, fieldViolation("username", err))
 	}
 
