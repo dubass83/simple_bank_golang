@@ -32,7 +32,7 @@ func main() {
 
 	conn, err := sql.Open(conf.DBDriver, conf.DBSource)
 	if err != nil {
-		log.Fatal("cannot connect to db:", err)
+		log.Fatal("cannot validate db connaction: ", err)
 	}
 	store := db.NewStore(conn)
 
@@ -58,7 +58,7 @@ func runDbMigration(migrationURL, dbSource string) {
 func runGateWayServer(conf util.Config, store db.Store) {
 	server, err := gapi.NewServer(conf, store)
 	if err != nil {
-		log.Fatal("cannot create server:", err)
+		log.Fatal("cannot create server: ", err)
 	}
 
 	jsonOptions := runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
@@ -77,7 +77,7 @@ func runGateWayServer(conf util.Config, store db.Store) {
 
 	err = pb.RegisterSimpleBankHandlerServer(ctx, grpcMux, server)
 	if err != nil {
-		log.Fatal("cannot register handler server:", err)
+		log.Fatal("cannot register handler server: ", err)
 	}
 
 	mux := http.NewServeMux()
@@ -85,7 +85,7 @@ func runGateWayServer(conf util.Config, store db.Store) {
 
 	statikFS, err := fs.New()
 	if err != nil {
-		log.Fatal("cannot create statik filesytem:", err)
+		log.Fatal("cannot create statik filesytem: ", err)
 	}
 
 	swagerHandler := http.StripPrefix("/swagger/", http.FileServer(statikFS))
@@ -93,12 +93,12 @@ func runGateWayServer(conf util.Config, store db.Store) {
 
 	listener, err := net.Listen("tcp", conf.HTTPAddressString)
 	if err != nil {
-		log.Fatal("cannot create listener:", err)
+		log.Fatal("cannot create listener: ", err)
 	}
 	log.Printf("start Gateway server on port %s", listener.Addr().String())
 	err = http.Serve(listener, mux)
 	if err != nil {
-		log.Fatal("cannot start Gateway server:", err)
+		log.Fatal("cannot start Gateway server: ", err)
 	}
 }
 
@@ -106,7 +106,7 @@ func runGateWayServer(conf util.Config, store db.Store) {
 func runGRPCServer(conf util.Config, store db.Store) {
 	server, err := gapi.NewServer(conf, store)
 	if err != nil {
-		log.Fatal("cannot create server:", err)
+		log.Fatal("cannot create server: ", err)
 	}
 
 	grpcServer := grpc.NewServer()
@@ -115,12 +115,12 @@ func runGRPCServer(conf util.Config, store db.Store) {
 
 	listener, err := net.Listen("tcp", conf.GRPCAddressString)
 	if err != nil {
-		log.Fatal("cannot create listener:", err)
+		log.Fatal("cannot create listener: ", err)
 	}
 	log.Printf("start gRPC server on port %s", listener.Addr().String())
 	err = grpcServer.Serve(listener)
 	if err != nil {
-		log.Fatal("cannot start gRPC server")
+		log.Fatal("cannot start gRPC server: ", err)
 	}
 }
 
@@ -128,10 +128,10 @@ func runGRPCServer(conf util.Config, store db.Store) {
 func runGinServer(conf util.Config, store db.Store) {
 	server, err := api.NewServer(conf, store)
 	if err != nil {
-		log.Fatal("can not create server:", err)
+		log.Fatal("can not create server: ", err)
 	}
 	err = server.Start(conf.HTTPAddressString)
 	if err != nil {
-		log.Fatal("can not start server:", err)
+		log.Fatal("can not start server: ", err)
 	}
 }
