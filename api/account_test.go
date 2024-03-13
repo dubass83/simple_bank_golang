@@ -16,8 +16,8 @@ import (
 	"github.com/dubass83/simplebank/token"
 	"github.com/dubass83/simplebank/util"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/mock/gomock"
 )
 
 func TestGetAccountAPI(t *testing.T) {
