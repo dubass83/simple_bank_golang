@@ -3,6 +3,7 @@ package gapi
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	db "github.com/dubass83/simplebank/db/sqlc"
@@ -15,8 +16,21 @@ import (
 )
 
 func (srv *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
+	payload, err := srv.authorizeUser(ctx)
+	if err != nil {
+		return nil, unauthenticatedError(err)
+	}
+
 	if violation := validateUpdateUserRequest(req); violation != nil {
 		return nil, invalidArgumentError(violation)
+	}
+
+	if payload.Username != req.GetUsername() {
+		err := fmt.Errorf("user: %s is not authorized to make changes in another user: %s",
+			payload.Username,
+			req.GetUsername(),
+		)
+		return nil, unauthenticatedError(err)
 	}
 
 	arg := db.UpdateUserParams{

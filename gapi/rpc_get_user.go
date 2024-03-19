@@ -3,6 +3,7 @@ package gapi
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/dubass83/simplebank/pb"
 	"github.com/dubass83/simplebank/val"
@@ -12,8 +13,20 @@ import (
 )
 
 func (srv *Server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+	payload, err := srv.authorizeUser(ctx)
+	if err != nil {
+		return nil, unauthenticatedError(err)
+	}
+
 	if violations := validateGetUserRequest(req); violations != nil {
 		return nil, invalidArgumentError(violations)
+	}
+	if payload.Username != req.GetUsername() {
+		err := fmt.Errorf("user: %s is not authorized to get information about another user: %s",
+			payload.Username,
+			req.GetUsername(),
+		)
+		return nil, unauthenticatedError(err)
 	}
 	user, err := srv.store.GetUser(ctx, req.GetUsername())
 	if err != nil {
