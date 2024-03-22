@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"net"
 	"net/http"
+	"os"
 
 	"github.com/dubass83/simplebank/api"
 	db "github.com/dubass83/simplebank/db/sqlc"
@@ -27,20 +28,25 @@ import (
 
 func main() {
 	// UNIX Time is faster and smaller than most timestamps
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	// zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+
 	conf, err := util.LoadConfig(".")
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("can not read config")
+	}
+
+	if conf.Enviroment == "devel" {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}
 
 	conn, err := sql.Open(conf.DBDriver, conf.DBSource)
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("cannot validate db connaction")
 	}
 	store := db.NewStore(conn)
@@ -57,16 +63,16 @@ func runDbMigration(migrationURL, dbSource string) {
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("cannot create migration instance")
 	}
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("cannot run migration up")
 	}
-	log.Print("successfully run db migration")
+	log.Info().Msg("successfully run db migration")
 }
 
 // runGateWayServer run Gateway server
@@ -75,7 +81,7 @@ func runGateWayServer(conf util.Config, store db.Store) {
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("cannot create server")
 	}
 
@@ -97,7 +103,7 @@ func runGateWayServer(conf util.Config, store db.Store) {
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("cannot register handler server")
 	}
 
@@ -108,7 +114,7 @@ func runGateWayServer(conf util.Config, store db.Store) {
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("cannot create statik filesytem")
 	}
 
@@ -119,15 +125,16 @@ func runGateWayServer(conf util.Config, store db.Store) {
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("cannot create listener")
 	}
-	log.Printf("start Gateway server on port %s", listener.Addr().String())
-	err = http.Serve(listener, mux)
+	log.Info().Msgf("start Gateway server on port %s", listener.Addr().String())
+	handler := gapi.HttpLogger(mux)
+	err = http.Serve(listener, handler)
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("cannot start Gateway server")
 	}
 }
@@ -138,7 +145,7 @@ func runGRPCServer(conf util.Config, store db.Store) {
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("cannot create server")
 	}
 
@@ -151,15 +158,15 @@ func runGRPCServer(conf util.Config, store db.Store) {
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("cannot create listener")
 	}
-	log.Printf("start gRPC server on port %s", listener.Addr().String())
+	log.Info().Msgf("start gRPC server on port %s", listener.Addr().String())
 	err = grpcServer.Serve(listener)
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("cannot start gRPC server")
 	}
 }
@@ -170,14 +177,14 @@ func runGinServer(conf util.Config, store db.Store) {
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("can not create server")
 	}
 	err = server.Start(conf.HTTPAddressString)
 	if err != nil {
 		log.Fatal().
 			Err(err).
-			Str("func", "main").
+			Str("method", "main").
 			Msg("can not start server")
 	}
 }
