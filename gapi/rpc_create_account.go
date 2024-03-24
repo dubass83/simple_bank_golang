@@ -46,8 +46,8 @@ func (srv *Server) CreateAccount(ctx context.Context, req *pb.CreateAccountReque
 }
 
 func validateCreateAccountRequest(req *pb.CreateAccountRequest) (violations []*errdetails.BadRequest_FieldViolation) {
-	if err := val.ValidateCurrency(req.GetCurrency()); err != nil {
-		violations = append(violations, fieldViolation("Currency", err))
+	if err := val.ValidateAccountCurrency(req.GetCurrency()); err != nil {
+		violations = append(violations, fieldViolation("AccountCurrency", err))
 	}
 	return
 }

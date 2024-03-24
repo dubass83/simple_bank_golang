@@ -56,9 +56,16 @@ func ValidateEmail(email string) error {
 	return nil
 }
 
-func ValidateCurrency(currrency string) error {
+func ValidateAccountCurrency(currrency string) error {
 	if !util.IfSupportedCurrency(currrency) {
 		return fmt.Errorf("not supported currency: %s", currrency)
+	}
+	return nil
+}
+
+func ValidateAccountId(id int64) error {
+	if id < 1 {
+		return fmt.Errorf("id must be a positive value gt then 0")
 	}
 	return nil
 }
