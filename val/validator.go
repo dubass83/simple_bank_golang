@@ -58,7 +58,7 @@ func ValidateEmail(email string) error {
 
 func ValidateCurrency(currrency string) error {
 	if !util.IfSupportedCurrency(currrency) {
-		return fmt.Errorf("mot supported currency: %s", currrency)
+		return fmt.Errorf("not supported currency: %s", currrency)
 	}
 	return nil
 }
