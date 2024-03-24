@@ -15,3 +15,12 @@ func convertUser(user db.User) *pb.User {
 		CreatedAt:        timestamppb.New(user.CreatedAt),
 	}
 }
+
+func convertAccount(account db.Account) *pb.Account {
+	return &pb.Account{
+		Id:       account.ID,
+		Owner:    account.Owner,
+		Balance:  account.Balance,
+		Carrency: account.Carrency,
+	}
+}
