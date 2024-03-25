@@ -24,3 +24,15 @@ func convertAccount(account db.Account) *pb.Account {
 		Carrency: account.Carrency,
 	}
 }
+
+func convertAccounts(accounts []db.Account) (pbAccs []*pb.Account) {
+	for _, account := range accounts {
+		pbAccs = append(pbAccs, &pb.Account{
+			Id:       account.ID,
+			Owner:    account.Owner,
+			Balance:  account.Balance,
+			Carrency: account.Carrency,
+		})
+	}
+	return
+}

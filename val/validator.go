@@ -69,3 +69,17 @@ func ValidateAccountId(id int64) error {
 	}
 	return nil
 }
+
+func ValidatePageNumber(param int32) error {
+	if param < 1 {
+		return fmt.Errorf("page number must be a positive value gt then 0")
+	}
+	return nil
+}
+
+func ValidatePageSize(param int32) error {
+	if param > 10 || param < 5 {
+		return fmt.Errorf("page size must be in interval between 5 and 10")
+	}
+	return nil
+}
