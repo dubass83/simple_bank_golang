@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Simple Bank Project",
-    "version": "1.4",
+    "version": "1.5",
     "contact": {
       "name": "Dubass83",
       "url": "https://github.com/dubass83/simplebank",
@@ -82,6 +82,39 @@
             "schema": {
               "$ref": "#/definitions/pbCreateUserRequest"
             }
+          }
+        ],
+        "tags": [
+          "SimpleBank"
+        ]
+      }
+    },
+    "/v1/delete_account/{id}": {
+      "delete": {
+        "summary": "Delete user account",
+        "description": "Delete user account by id",
+        "operationId": "SimpleBank_DeleteAccount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbDeleteAccountResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -319,6 +352,14 @@
       "properties": {
         "user": {
           "$ref": "#/definitions/pbUser"
+        }
+      }
+    },
+    "pbDeleteAccountResponse": {
+      "type": "object",
+      "properties": {
+        "accountWasDeleted": {
+          "type": "string"
         }
       }
     },

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb;
+ 
+option go_package = "github.com/dubass83/simplebank/pb";
+
+message DeleteAccountRequest {
+  int64 id = 1;
+}
+ 
+message DeleteAccountResponse {
+  string account_was_deleted = 1;
+}
