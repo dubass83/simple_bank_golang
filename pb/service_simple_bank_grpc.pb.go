@@ -19,14 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	SimpleBank_CreateUser_FullMethodName    = "/pb.SimpleBank/CreateUser"
-	SimpleBank_UpdateUser_FullMethodName    = "/pb.SimpleBank/UpdateUser"
-	SimpleBank_LoginUser_FullMethodName     = "/pb.SimpleBank/LoginUser"
-	SimpleBank_GetUser_FullMethodName       = "/pb.SimpleBank/GetUser"
-	SimpleBank_CreateAccount_FullMethodName = "/pb.SimpleBank/CreateAccount"
-	SimpleBank_GetAccount_FullMethodName    = "/pb.SimpleBank/GetAccount"
-	SimpleBank_ListAccounts_FullMethodName  = "/pb.SimpleBank/ListAccounts"
-	SimpleBank_DeleteAccount_FullMethodName = "/pb.SimpleBank/DeleteAccount"
+	SimpleBank_CreateUser_FullMethodName     = "/pb.SimpleBank/CreateUser"
+	SimpleBank_UpdateUser_FullMethodName     = "/pb.SimpleBank/UpdateUser"
+	SimpleBank_LoginUser_FullMethodName      = "/pb.SimpleBank/LoginUser"
+	SimpleBank_GetUser_FullMethodName        = "/pb.SimpleBank/GetUser"
+	SimpleBank_CreateAccount_FullMethodName  = "/pb.SimpleBank/CreateAccount"
+	SimpleBank_GetAccount_FullMethodName     = "/pb.SimpleBank/GetAccount"
+	SimpleBank_ListAccounts_FullMethodName   = "/pb.SimpleBank/ListAccounts"
+	SimpleBank_DeleteAccount_FullMethodName  = "/pb.SimpleBank/DeleteAccount"
+	SimpleBank_CreateTransfer_FullMethodName = "/pb.SimpleBank/CreateTransfer"
 )
 
 // SimpleBankClient is the client API for SimpleBank service.
@@ -41,6 +42,7 @@ type SimpleBankClient interface {
 	GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*GetAccountResponse, error)
 	ListAccounts(ctx context.Context, in *ListAccountsRequest, opts ...grpc.CallOption) (*ListAccountsResponse, error)
 	DeleteAccount(ctx context.Context, in *DeleteAccountRequest, opts ...grpc.CallOption) (*DeleteAccountResponse, error)
+	CreateTransfer(ctx context.Context, in *CreateTransferRequest, opts ...grpc.CallOption) (*CreateTransferResponse, error)
 }
 
 type simpleBankClient struct {
@@ -123,6 +125,15 @@ func (c *simpleBankClient) DeleteAccount(ctx context.Context, in *DeleteAccountR
 	return out, nil
 }
 
+func (c *simpleBankClient) CreateTransfer(ctx context.Context, in *CreateTransferRequest, opts ...grpc.CallOption) (*CreateTransferResponse, error) {
+	out := new(CreateTransferResponse)
+	err := c.cc.Invoke(ctx, SimpleBank_CreateTransfer_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SimpleBankServer is the server API for SimpleBank service.
 // All implementations must embed UnimplementedSimpleBankServer
 // for forward compatibility
@@ -135,6 +146,7 @@ type SimpleBankServer interface {
 	GetAccount(context.Context, *GetAccountRequest) (*GetAccountResponse, error)
 	ListAccounts(context.Context, *ListAccountsRequest) (*ListAccountsResponse, error)
 	DeleteAccount(context.Context, *DeleteAccountRequest) (*DeleteAccountResponse, error)
+	CreateTransfer(context.Context, *CreateTransferRequest) (*CreateTransferResponse, error)
 	mustEmbedUnimplementedSimpleBankServer()
 }
 
@@ -165,6 +177,9 @@ func (UnimplementedSimpleBankServer) ListAccounts(context.Context, *ListAccounts
 }
 func (UnimplementedSimpleBankServer) DeleteAccount(context.Context, *DeleteAccountRequest) (*DeleteAccountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAccount not implemented")
+}
+func (UnimplementedSimpleBankServer) CreateTransfer(context.Context, *CreateTransferRequest) (*CreateTransferResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTransfer not implemented")
 }
 func (UnimplementedSimpleBankServer) mustEmbedUnimplementedSimpleBankServer() {}
 
@@ -323,6 +338,24 @@ func _SimpleBank_DeleteAccount_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SimpleBank_CreateTransfer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTransferRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SimpleBankServer).CreateTransfer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SimpleBank_CreateTransfer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SimpleBankServer).CreateTransfer(ctx, req.(*CreateTransferRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SimpleBank_ServiceDesc is the grpc.ServiceDesc for SimpleBank service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -361,6 +394,10 @@ var SimpleBank_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAccount",
 			Handler:    _SimpleBank_DeleteAccount_Handler,
+		},
+		{
+			MethodName: "CreateTransfer",
+			Handler:    _SimpleBank_CreateTransfer_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
