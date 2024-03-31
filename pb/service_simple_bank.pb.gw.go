@@ -318,7 +318,7 @@ func local_request_SimpleBank_DeleteAccount_0(ctx context.Context, marshaler run
 }
 
 func request_SimpleBank_CreateTransfer_0(ctx context.Context, marshaler runtime.Marshaler, client SimpleBankClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CreateTransferRequest
+	var protoReq CreateTransferTxRequest
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
@@ -331,7 +331,7 @@ func request_SimpleBank_CreateTransfer_0(ctx context.Context, marshaler runtime.
 }
 
 func local_request_SimpleBank_CreateTransfer_0(ctx context.Context, marshaler runtime.Marshaler, server SimpleBankServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CreateTransferRequest
+	var protoReq CreateTransferTxRequest
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && err != io.EOF {
@@ -557,7 +557,7 @@ func RegisterSimpleBankHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/pb.SimpleBank/CreateTransfer", runtime.WithHTTPPathPattern("/v1/create_transfer"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/pb.SimpleBank/CreateTransfer", runtime.WithHTTPPathPattern("/v1/create_transfer_tx"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -797,7 +797,7 @@ func RegisterSimpleBankHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/pb.SimpleBank/CreateTransfer", runtime.WithHTTPPathPattern("/v1/create_transfer"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/pb.SimpleBank/CreateTransfer", runtime.WithHTTPPathPattern("/v1/create_transfer_tx"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -833,7 +833,7 @@ var (
 
 	pattern_SimpleBank_DeleteAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "delete_account", "id"}, ""))
 
-	pattern_SimpleBank_CreateTransfer_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "create_transfer"}, ""))
+	pattern_SimpleBank_CreateTransfer_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "create_transfer_tx"}, ""))
 )
 
 var (

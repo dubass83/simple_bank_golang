@@ -5,6 +5,7 @@ import (
 	"net/mail"
 	"regexp"
 
+	db "github.com/dubass83/simplebank/db/sqlc"
 	"github.com/dubass83/simplebank/util"
 )
 
@@ -80,6 +81,24 @@ func ValidatePageNumber(param int32) error {
 func ValidatePageSize(param int32) error {
 	if param > 10 || param < 5 {
 		return fmt.Errorf("page size must be in interval between 5 and 10")
+	}
+	return nil
+}
+
+func ValidateMoneyAmmount(amount int64) error {
+	if amount < 0 {
+		return fmt.Errorf("cannot transfer negative amount of money")
+	}
+	return nil
+}
+
+func ValidateTxCarrency(fromAccount, toAccount db.Account) error {
+	if fromAccount.Carrency != toAccount.Carrency {
+		return fmt.Errorf(
+			"user can only transfer money with the same carrency. from Account carrency: %s - to Account carrency: %s",
+			fromAccount.Carrency,
+			toAccount.Carrency,
+		)
 	}
 	return nil
 }

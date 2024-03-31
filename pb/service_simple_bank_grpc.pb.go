@@ -42,7 +42,7 @@ type SimpleBankClient interface {
 	GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*GetAccountResponse, error)
 	ListAccounts(ctx context.Context, in *ListAccountsRequest, opts ...grpc.CallOption) (*ListAccountsResponse, error)
 	DeleteAccount(ctx context.Context, in *DeleteAccountRequest, opts ...grpc.CallOption) (*DeleteAccountResponse, error)
-	CreateTransfer(ctx context.Context, in *CreateTransferRequest, opts ...grpc.CallOption) (*CreateTransferResponse, error)
+	CreateTransfer(ctx context.Context, in *CreateTransferTxRequest, opts ...grpc.CallOption) (*CreateTransferTxResponse, error)
 }
 
 type simpleBankClient struct {
@@ -125,8 +125,8 @@ func (c *simpleBankClient) DeleteAccount(ctx context.Context, in *DeleteAccountR
 	return out, nil
 }
 
-func (c *simpleBankClient) CreateTransfer(ctx context.Context, in *CreateTransferRequest, opts ...grpc.CallOption) (*CreateTransferResponse, error) {
-	out := new(CreateTransferResponse)
+func (c *simpleBankClient) CreateTransfer(ctx context.Context, in *CreateTransferTxRequest, opts ...grpc.CallOption) (*CreateTransferTxResponse, error) {
+	out := new(CreateTransferTxResponse)
 	err := c.cc.Invoke(ctx, SimpleBank_CreateTransfer_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -146,7 +146,7 @@ type SimpleBankServer interface {
 	GetAccount(context.Context, *GetAccountRequest) (*GetAccountResponse, error)
 	ListAccounts(context.Context, *ListAccountsRequest) (*ListAccountsResponse, error)
 	DeleteAccount(context.Context, *DeleteAccountRequest) (*DeleteAccountResponse, error)
-	CreateTransfer(context.Context, *CreateTransferRequest) (*CreateTransferResponse, error)
+	CreateTransfer(context.Context, *CreateTransferTxRequest) (*CreateTransferTxResponse, error)
 	mustEmbedUnimplementedSimpleBankServer()
 }
 
@@ -178,7 +178,7 @@ func (UnimplementedSimpleBankServer) ListAccounts(context.Context, *ListAccounts
 func (UnimplementedSimpleBankServer) DeleteAccount(context.Context, *DeleteAccountRequest) (*DeleteAccountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAccount not implemented")
 }
-func (UnimplementedSimpleBankServer) CreateTransfer(context.Context, *CreateTransferRequest) (*CreateTransferResponse, error) {
+func (UnimplementedSimpleBankServer) CreateTransfer(context.Context, *CreateTransferTxRequest) (*CreateTransferTxResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTransfer not implemented")
 }
 func (UnimplementedSimpleBankServer) mustEmbedUnimplementedSimpleBankServer() {}
@@ -339,7 +339,7 @@ func _SimpleBank_DeleteAccount_Handler(srv interface{}, ctx context.Context, dec
 }
 
 func _SimpleBank_CreateTransfer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateTransferRequest)
+	in := new(CreateTransferTxRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -351,7 +351,7 @@ func _SimpleBank_CreateTransfer_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: SimpleBank_CreateTransfer_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SimpleBankServer).CreateTransfer(ctx, req.(*CreateTransferRequest))
+		return srv.(SimpleBankServer).CreateTransfer(ctx, req.(*CreateTransferTxRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

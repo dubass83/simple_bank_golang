@@ -1,6 +1,9 @@
 package gapi
 
 import (
+	"database/sql"
+	"fmt"
+
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -27,4 +30,11 @@ func invalidArgumentError(violations []*errdetails.BadRequest_FieldViolation) er
 
 func unauthenticatedError(err error) error {
 	return status.Errorf(codes.Unauthenticated, "unauthorized: %s", err)
+}
+
+func cannotGetAccountError(err error) error {
+	if err == sql.ErrNoRows {
+		return fmt.Errorf("account not found: %s", err)
+	}
+	return fmt.Errorf("cannot get Account: %s", err)
 }

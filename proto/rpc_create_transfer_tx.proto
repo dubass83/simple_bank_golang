@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package pb;
+
+import "account.proto";
+import "entry.proto";
+import "transfer.proto";
+
+option go_package = "github.com/dubass83/simplebank/pb";
+
+message CreateTransferTxRequest {
+  int64 from_account_id = 1;
+  int64 to_account_id = 2;
+  int64 amount = 3;
+}
+ 
+message CreateTransferTxResponse {
+  Transfer transfer = 1;
+  Account  from_account = 2;
+  Account  to_account = 3;
+  Entry    from_entry = 4;
+  Entry    to_entry = 5;
+}

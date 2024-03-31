@@ -55,16 +55,16 @@
         ]
       }
     },
-    "/v1/create_transfer": {
+    "/v1/create_transfer_tx": {
       "post": {
-        "summary": "Create money transfer",
-        "description": "Create money transfer from one account to another",
+        "summary": "Create money transfer transaction",
+        "description": "Create money transfer transaction from one account to another",
         "operationId": "SimpleBank_CreateTransfer",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/pbCreateTransferResponse"
+              "$ref": "#/definitions/pbCreateTransferTxResponse"
             }
           },
           "default": {
@@ -80,7 +80,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/pbCreateTransferRequest"
+              "$ref": "#/definitions/pbCreateTransferTxRequest"
             }
           }
         ],
@@ -364,7 +364,7 @@
         }
       }
     },
-    "pbCreateTransferRequest": {
+    "pbCreateTransferTxRequest": {
       "type": "object",
       "properties": {
         "fromAccountId": {
@@ -381,28 +381,23 @@
         }
       }
     },
-    "pbCreateTransferResponse": {
+    "pbCreateTransferTxResponse": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
+        "transfer": {
+          "$ref": "#/definitions/pbTransfer"
         },
-        "fromAccountId": {
-          "type": "string",
-          "format": "int64"
+        "fromAccount": {
+          "$ref": "#/definitions/pbAccount"
         },
-        "toAccountId": {
-          "type": "string",
-          "format": "int64"
+        "toAccount": {
+          "$ref": "#/definitions/pbAccount"
         },
-        "amount": {
-          "type": "string",
-          "format": "int64"
+        "fromEntry": {
+          "$ref": "#/definitions/pbEntry"
         },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
+        "toEntry": {
+          "$ref": "#/definitions/pbEntry"
         }
       }
     },
@@ -436,6 +431,27 @@
       "properties": {
         "accountWasDeleted": {
           "type": "string"
+        }
+      }
+    },
+    "pbEntry": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "accountId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "amount": {
+          "type": "string",
+          "format": "int64"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -513,6 +529,31 @@
         },
         "user": {
           "$ref": "#/definitions/pbUser"
+        }
+      }
+    },
+    "pbTransfer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "fromAccountId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "toAccountId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "amount": {
+          "type": "string",
+          "format": "int64"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
