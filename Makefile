@@ -1,5 +1,5 @@
 .PHONY: *
-DOCKER_NAME = dev-postgres
+ENV = dev
 
 dockerup:
 	limactl start docker
@@ -8,21 +8,30 @@ dockerdown:
 	limactl stop docker
 
 postgresup:
-	docker start ${DOCKER_NAME} \
-	|| docker run --name ${DOCKER_NAME} \
+	docker start ${ENV}-postgres \
+	|| docker run --name ${ENV}-postgres \
 	-e POSTGRES_PASSWORD=postgres \
 	-e POSTGRES_DB=simple_bank \
 	-p 5432:5432 -d postgres
 
 postgresdown:
-	docker stop ${DOCKER_NAME}
-	docker rm ${DOCKER_NAME}
+	docker stop ${ENV}-postgres
+	docker rm ${ENV}-postgres
+
+redisup:
+	docker start ${ENV}-redis \
+	|| docker run --name ${ENV}-redis \
+	-p 6379:6379 -d redis:7.2-alpine
+
+redisdown:
+	docker stop ${ENV}-redis
+	docker rm ${ENV}-redis
 
 # createdb:
-# 	docker exec -it ${DOCKER_NAME} createdb -U postgres -O postgres simple_bank
+# 	docker exec -it ${ENV}-postgres createdb -U postgres -O postgres simple_bank
 
 # dropdb:
-# 	docker exec -it ${DOCKER_NAME} dropdb -U postgres simple_bank
+# 	docker exec -it ${ENV}-postgres dropdb -U postgres simple_bank
 
 migrateup:
 	migrate -path db/migration -database "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" -verbose up

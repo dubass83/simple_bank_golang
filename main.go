@@ -13,10 +13,12 @@ import (
 	"github.com/dubass83/simplebank/gapi"
 	"github.com/dubass83/simplebank/pb"
 	"github.com/dubass83/simplebank/util"
+	"github.com/dubass83/simplebank/worker"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/hibiken/asynq"
 	_ "github.com/lib/pq"
 	"github.com/rakyll/statik/fs"
 	"github.com/rs/zerolog"
@@ -51,10 +53,17 @@ func main() {
 	}
 	store := db.NewStore(conn)
 
+	redisOpts := asynq.RedisClientOpt{
+		Addr: conf.RedisAddress,
+	}
+
+	RedisTaskDestributor := worker.NewRedisTaskDistributor(redisOpts)
+
 	runDbMigration(conf.MigrationURL, conf.DBSource)
 
-	go runGateWayServer(conf, store)
-	runGRPCServer(conf, store)
+	go runTaskProcessor(redisOpts, store)
+	go runGateWayServer(conf, store, RedisTaskDestributor)
+	runGRPCServer(conf, store, RedisTaskDestributor)
 }
 
 // runDbMigration run db migration from provided URL to the db
@@ -76,8 +85,8 @@ func runDbMigration(migrationURL, dbSource string) {
 }
 
 // runGateWayServer run Gateway server
-func runGateWayServer(conf util.Config, store db.Store) {
-	server, err := gapi.NewServer(conf, store)
+func runGateWayServer(conf util.Config, store db.Store, taskDistributor worker.TaskDistributor) {
+	server, err := gapi.NewServer(conf, store, taskDistributor)
 	if err != nil {
 		log.Fatal().
 			Err(err).
@@ -139,9 +148,22 @@ func runGateWayServer(conf util.Config, store db.Store) {
 	}
 }
 
+// runTaskProcessor connect to redis and process task from the queue
+func runTaskProcessor(redisOpts asynq.RedisClientOpt, store db.Store) {
+	taskProcessor := worker.NewRedisTaskProcessor(redisOpts, store)
+	log.Info().Msg("start processing tasks from redis queue")
+	err := taskProcessor.Start()
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Str("method", "main").
+			Msg("cannot start taskProcessor")
+	}
+}
+
 // runGRPCServer run gRPC server
-func runGRPCServer(conf util.Config, store db.Store) {
-	server, err := gapi.NewServer(conf, store)
+func runGRPCServer(conf util.Config, store db.Store, taskDistributor worker.TaskDistributor) {
+	server, err := gapi.NewServer(conf, store, taskDistributor)
 	if err != nil {
 		log.Fatal().
 			Err(err).

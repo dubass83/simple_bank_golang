@@ -2,11 +2,14 @@ package gapi
 
 import (
 	"context"
+	"time"
 
 	db "github.com/dubass83/simplebank/db/sqlc"
 	"github.com/dubass83/simplebank/pb"
 	"github.com/dubass83/simplebank/util"
 	"github.com/dubass83/simplebank/val"
+	"github.com/dubass83/simplebank/worker"
+	"github.com/hibiken/asynq"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,6 +37,19 @@ func (srv *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*
 			return nil, status.Errorf(codes.AlreadyExists, "user already exist: %s", err)
 		}
 		return nil, status.Errorf(codes.Internal, "cannot create user: %s", err)
+	}
+
+	payload := &worker.PayloadSendVerifyEmail{
+		Username: user.Username,
+	}
+	opts := []asynq.Option{
+		asynq.MaxRetry(10),
+		asynq.ProcessIn(10 * time.Second),
+		asynq.Queue(worker.QueueCritical),
+	}
+	err = srv.taskDestributor.DestributeTaskSendVerifyEmail(ctx, payload, opts...)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "cannot send task to redis and validate user email: %s", err)
 	}
 
 	rsp := &pb.CreateUserResponse{
