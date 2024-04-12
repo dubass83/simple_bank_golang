@@ -24,14 +24,28 @@ func (srv *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*
 		return nil, status.Errorf(codes.Internal, "cannot create hash from password: %s", err)
 	}
 
-	arg := db.CreateUserParams{
-		Username:       req.GetUsername(),
-		HashedPassword: hash,
-		FullName:       req.GetFullName(),
-		Email:          req.GetEmail(),
+	arg := db.CreateUserTxParams{
+		CreateUserParams: db.CreateUserParams{
+			Username:       req.GetUsername(),
+			HashedPassword: hash,
+			FullName:       req.GetFullName(),
+			Email:          req.GetEmail(),
+		},
+		AfterFunc: func(user db.User) error {
+
+			payload := &worker.PayloadSendVerifyEmail{
+				Username: user.Username,
+			}
+			opts := []asynq.Option{
+				asynq.MaxRetry(10),
+				asynq.ProcessIn(10 * time.Second),
+				asynq.Queue(worker.QueueCritical),
+			}
+			return srv.taskDestributor.DestributeTaskSendVerifyEmail(ctx, payload, opts...)
+		},
 	}
 
-	user, err := srv.store.CreateUser(ctx, arg)
+	userTx, err := srv.store.CreateUserTx(ctx, arg)
 	if err != nil {
 		if db.ErrorCode(err) == db.UniqueViolation {
 			return nil, status.Errorf(codes.AlreadyExists, "user already exist: %s", err)
@@ -39,21 +53,8 @@ func (srv *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*
 		return nil, status.Errorf(codes.Internal, "cannot create user: %s", err)
 	}
 
-	payload := &worker.PayloadSendVerifyEmail{
-		Username: user.Username,
-	}
-	opts := []asynq.Option{
-		asynq.MaxRetry(10),
-		asynq.ProcessIn(10 * time.Second),
-		asynq.Queue(worker.QueueCritical),
-	}
-	err = srv.taskDestributor.DestributeTaskSendVerifyEmail(ctx, payload, opts...)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "cannot send task to redis and validate user email: %s", err)
-	}
-
 	rsp := &pb.CreateUserResponse{
-		User: convertUser(user),
+		User: convertUser(userTx.User),
 	}
 
 	return rsp, nil
