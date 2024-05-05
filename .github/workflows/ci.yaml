@@ -44,7 +44,7 @@ jobs:
           sudo mv migrate /usr/local/bin/migrate
           which migrate
       - name: Make migrations
-        run: make migrateup
+        run: make migrate_up
       - name: Test with the Go CLI
         # env:
         #   POSTGRES_HOST: postgres

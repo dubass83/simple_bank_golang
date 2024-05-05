@@ -52,13 +52,19 @@ The service that we’re going to build is a simple bank. It will provide APIs f
 - Start docker:
 
     ```bash
-    make dockerup
+    make docker_up
     ```
 
 - Start postgres container:
 
     ```bash
-    make postgresup
+    make postgres_up
+    ```
+
+- Start redis container:
+
+    ```bash
+    make redis_up
     ```
 
 - Create simple_bank database:
@@ -70,25 +76,25 @@ The service that we’re going to build is a simple bank. It will provide APIs f
 - Run db migration up all versions:
 
     ```bash
-    make migrateup
+    make migrate_up
     ```
 
 - Run db migration up 1 version:
 
     ```bash
-    make migrateup1
+    make migrate_up1
     ```
 
 - Run db migration down all versions:
 
     ```bash
-    make migratedown
+    make migrate_down
     ```
 
 - Run db migration down 1 version:
 
     ```bash
-    make migratedown1
+    make migrate_down1
     ```
 
 ### Documentation
