@@ -1,5 +1,6 @@
 .PHONY: *
 ENV = dev
+DB_URL = "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable"
 
 dockerup:
 	limactl start docker
@@ -34,18 +35,18 @@ redisdown:
 # 	docker exec -it ${ENV}-postgres dropdb -U postgres simple_bank
 
 migrateup:
-	migrate -path db/migration -database "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" -verbose up
+	migrate -path db/migration -database ${DB_URL} -verbose up
 
 migrateupone:
-	migrate -path db/migration -database "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" -verbose up 1
+	migrate -path db/migration -database ${DB_URL} -verbose up 1
 
 migratedown:
-	migrate -path db/migration -database "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" -verbose down
+	migrate -path db/migration -database ${DB_URL} -verbose down
 
 migratedownone:
-	migrate -path db/migration -database "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" -verbose down 1
+	migrate -path db/migration -database ${DB_URL} -verbose down 1
 # migrateforce:
-# 	migrate -path db/migration -database "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable" force 1
+# 	migrate -path db/migration -database ${DB_URL} force 1
 
 sqlc:
 	sqlc generate
@@ -56,7 +57,7 @@ test:
 runtest: postgresup createdb migrateup
 	go test -v -cover ./...
 
-clean: postgresdown
+clean: postgresdown redisdown dockerdown
 
 server:
 	go run main.go
@@ -79,3 +80,9 @@ proto:
 
 evans:
 	evans -p 9090 -r repl
+
+db_docs:
+	dbdocs build docs/db.dbml
+
+db_schema:
+	dbml2sql --postgres -o docs/schema.sql docs/db.dbml

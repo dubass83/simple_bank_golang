@@ -31,7 +31,7 @@ The service that we’re going to build is a simple bank. It will provide APIs f
 - [DBML CLI](https://www.dbml.org/cli/#installation)
 
     ```bash
-    npm install -g @dbml/cli
+    brew install dbml-cli
     dbml2sql --version
     ```
 
