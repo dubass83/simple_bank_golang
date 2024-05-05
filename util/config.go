@@ -19,6 +19,10 @@ type Config struct {
 	TokenString          string        `mapstructure:"TOKEN_STRING"`
 	TokenDuration        time.Duration `mapstructure:"TOKEN_DURATION"`
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+	EmailSenderName      string        `mapstructure:"EMAIL_SENDER_NAME"`
+	EmailSenderEmailFrom string        `mapstructure:"EMAIL_SENDER_EMAIL_FROM"`
+	MailtrapLogin        string        `mapstructure:"MAILTRAP_LOGIN"`
+	MailtrapPass         string        `mapstructure:"MAILTRAP_PASS"`
 }
 
 // LoadConfig read configuration from config file or enviroment variables
@@ -30,6 +34,7 @@ func LoadConfig(configPath string) (config Config, err error) {
 	if err != nil {
 		return
 	}
+	viper.AutomaticEnv()
 	err = viper.Unmarshal(&config)
 	return
 }
