@@ -8,9 +8,9 @@ import (
 )
 
 func TestSendEmail(t *testing.T) {
-	// if testing.Short() {
-	// 	t.Skip()
-	// }
+	if testing.Short() {
+		t.Skip()
+	}
 	config, err := util.LoadConfig("..")
 	require.NoError(t, err)
 
