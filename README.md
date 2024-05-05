@@ -91,7 +91,7 @@ The service that we’re going to build is a simple bank. It will provide APIs f
     make migratedown1
     ```
 
-<!-- ### Documentation
+### Documentation
 
 - Generate DB documentation:
 
@@ -99,7 +99,7 @@ The service that we’re going to build is a simple bank. It will provide APIs f
     make db_docs
     ```
 
-- Access the DB documentation at [this address](https://dbdocs.io/techschool.guru/simple_bank). Password: `secret`
+- Access the DB documentation at [this address](https://dbdocs.io/makssych/simple_bank).
 
 ### How to generate code
 
@@ -107,7 +107,7 @@ The service that we’re going to build is a simple bank. It will provide APIs f
 
     ```bash
     make db_schema
-    ``` -->
+    ```
 
 - Generate SQL CRUD with sqlc:
 
@@ -121,11 +121,11 @@ The service that we’re going to build is a simple bank. It will provide APIs f
     make mock
     ```
 
-<!-- - Create a new db migration:
+- Create a new db migration:
 
     ```bash
     make new_migration name=<migration_name>
-    ``` -->
+    ```
 
 ### How to run
 

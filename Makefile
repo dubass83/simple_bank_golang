@@ -2,29 +2,29 @@
 ENV = dev
 DB_URL = "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable"
 
-dockerup:
+docker_up:
 	limactl start docker
 
-dockerdown: 
+docker_down: 
 	limactl stop docker
 
-postgresup:
+postgres_up:
 	docker start ${ENV}-postgres \
 	|| docker run --name ${ENV}-postgres \
 	-e POSTGRES_PASSWORD=postgres \
 	-e POSTGRES_DB=simple_bank \
 	-p 5432:5432 -d postgres
 
-postgresdown:
+postgres_down:
 	docker stop ${ENV}-postgres
 	docker rm ${ENV}-postgres
 
-redisup:
+redis_up:
 	docker start ${ENV}-redis \
 	|| docker run --name ${ENV}-redis \
 	-p 6379:6379 -d redis:7.2-alpine
 
-redisdown:
+redis_down:
 	docker stop ${ENV}-redis
 	docker rm ${ENV}-redis
 
@@ -34,16 +34,16 @@ redisdown:
 # dropdb:
 # 	docker exec -it ${ENV}-postgres dropdb -U postgres simple_bank
 
-migrateup:
+migrate_up:
 	migrate -path db/migration -database ${DB_URL} -verbose up
 
-migrateupone:
+migrate_up1:
 	migrate -path db/migration -database ${DB_URL} -verbose up 1
 
-migratedown:
+migrate_down:
 	migrate -path db/migration -database ${DB_URL} -verbose down
 
-migratedownone:
+migrate_down1:
 	migrate -path db/migration -database ${DB_URL} -verbose down 1
 # migrateforce:
 # 	migrate -path db/migration -database ${DB_URL} force 1
@@ -54,10 +54,10 @@ sqlc:
 test:
 	go test -v -cover -short ./...
 
-runtest: postgresup createdb migrateup
+run_test: postgres_up createdb migrate_up
 	go test -v -cover ./...
 
-clean: postgresdown redisdown dockerdown
+clean: postgres_down redis_down docker_down
 
 server:
 	go run main.go
@@ -86,3 +86,6 @@ db_docs:
 
 db_schema:
 	dbml2sql --postgres -o docs/schema.sql docs/db.dbml
+
+new_migration:
+	migrate create -ext sql -dir db/migration -seq ${name}
