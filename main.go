@@ -11,6 +11,7 @@ import (
 	db "github.com/dubass83/simplebank/db/sqlc"
 	_ "github.com/dubass83/simplebank/docs/statik"
 	"github.com/dubass83/simplebank/gapi"
+	"github.com/dubass83/simplebank/mail"
 	"github.com/dubass83/simplebank/pb"
 	"github.com/dubass83/simplebank/util"
 	"github.com/dubass83/simplebank/worker"
@@ -61,7 +62,7 @@ func main() {
 
 	runDbMigration(conf.MigrationURL, conf.DBSource)
 
-	go runTaskProcessor(redisOpts, store)
+	go runTaskProcessor(conf, redisOpts, store)
 	go runGateWayServer(conf, store, RedisTaskDestributor)
 	runGRPCServer(conf, store, RedisTaskDestributor)
 }
@@ -149,8 +150,14 @@ func runGateWayServer(conf util.Config, store db.Store, taskDistributor worker.T
 }
 
 // runTaskProcessor connect to redis and process task from the queue
-func runTaskProcessor(redisOpts asynq.RedisClientOpt, store db.Store) {
-	taskProcessor := worker.NewRedisTaskProcessor(redisOpts, store)
+func runTaskProcessor(conf util.Config, redisOpts asynq.RedisClientOpt, store db.Store) {
+	sender := mail.NewMailtrapSender(
+		conf.EmailSenderName,
+		conf.EmailSenderEmailFrom,
+		conf.MailtrapLogin,
+		conf.MailtrapPass,
+	)
+	taskProcessor := worker.NewRedisTaskProcessor(redisOpts, store, sender)
 	log.Info().Msg("start processing tasks from redis queue")
 	err := taskProcessor.Start()
 	if err != nil {

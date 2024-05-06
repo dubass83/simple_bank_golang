@@ -5,11 +5,19 @@ import (
 	"encoding/json"
 	"fmt"
 
+	db "github.com/dubass83/simplebank/db/sqlc"
+	"github.com/dubass83/simplebank/util"
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
 )
 
-const TaskSendVerifyEmail = "task:send_verify_email"
+const (
+	TaskSendVerifyEmail = "task:send_verify_email"
+	EmailBody           = `<h1>Hi there, %s!</h1></br>
+	<p>This is wellcome message from simple bank dev project</p></br>
+    <p>To verify email go to this <a href="%s">link!</a></p></br>
+	<p>You can find source code <a href="https://github.com/dubass83/simple_bank_golang">here</a></p>`
+)
 
 type PayloadSendVerifyEmail struct {
 	Username string `json:"username"`
@@ -50,8 +58,19 @@ func (processor *RedisTaskProcessor) ProcesTaskVerifyEmail(ctx context.Context, 
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 
-	// TODO: send email to the user
+	ve, err := processor.store.CreateVerifyEmail(ctx, db.CreateVerifyEmailParams{
+		Username:   user.Username,
+		Email:      user.Email,
+		SecretCode: util.RandomString(32),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create verify email: %w", err)
+	}
+	subject := "Hello from Simple Bank!"
+	verifyURL := fmt.Sprintf("http://localhost:8080/v1/verify_email?id=%d&secret_code=%s", ve.ID, ve.SecretCode)
+	content := fmt.Sprintf(EmailBody, user.Username, verifyURL)
+	to := []string{"makssych@gmail.com", "makssych@outlook.com"}
 	log.Info().Str("type", task.Type()).Bytes("payload", task.Payload()).
 		Str("email", user.Email).Msg("processed task")
-	return nil
+	return processor.sender.SendEmail(subject, content, to, nil, nil, nil)
 }
