@@ -8,6 +8,9 @@ RETURNING *;
 
 -- name: UpdateVerifyEmail :one
 UPDATE verify_emails
-SET is_used = $2
-WHERE id = $1
+SET is_used = true
+WHERE id = @id
+AND secret_code = @secret_code
+AND is_used = false
+AND expired_at > now() 
 RETURNING *;

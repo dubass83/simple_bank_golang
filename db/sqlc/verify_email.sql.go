@@ -41,18 +41,21 @@ func (q *Queries) CreateVerifyEmail(ctx context.Context, arg CreateVerifyEmailPa
 
 const updateVerifyEmail = `-- name: UpdateVerifyEmail :one
 UPDATE verify_emails
-SET is_used = $2
+SET is_used = true
 WHERE id = $1
+AND secret_code = $2
+AND is_used = false
+AND expired_at > now() 
 RETURNING id, username, email, secret_code, is_used, created_at, expired_at
 `
 
 type UpdateVerifyEmailParams struct {
-	ID     int64 `json:"id"`
-	IsUsed bool  `json:"isUsed"`
+	ID         int64  `json:"id"`
+	SecretCode string `json:"secretCode"`
 }
 
 func (q *Queries) UpdateVerifyEmail(ctx context.Context, arg UpdateVerifyEmailParams) (VerifyEmail, error) {
-	row := q.db.QueryRowContext(ctx, updateVerifyEmail, arg.ID, arg.IsUsed)
+	row := q.db.QueryRowContext(ctx, updateVerifyEmail, arg.ID, arg.SecretCode)
 	var i VerifyEmail
 	err := row.Scan(
 		&i.ID,

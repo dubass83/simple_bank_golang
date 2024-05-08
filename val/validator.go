@@ -102,3 +102,14 @@ func ValidateTxCarrency(fromAccount, toAccount db.Account) error {
 	}
 	return nil
 }
+
+func ValidateVerifyEmailID(id int64) error {
+	if id <= 0 {
+		return fmt.Errorf("id should be greater then 0")
+	}
+	return nil
+}
+
+func ValidateVerifyEmailSecretCode(secretCode string) error {
+	return validateString(secretCode, 32, 128)
+}
