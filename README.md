@@ -1,4 +1,4 @@
- # Simple Bank
+# Simple Bank
 
 ## Simple bank service
 

@@ -64,6 +64,7 @@ server:
 
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/dubass83/simplebank/db/sqlc Store
+	mockgen -package mockwk -destination worker/mock/distributer.go github.com/dubass83/simplebank/worker TaskDistributor
 
 build:
 	docker build -t simple-bank -f Dockerfile .
