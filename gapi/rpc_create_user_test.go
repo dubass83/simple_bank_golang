@@ -2,6 +2,7 @@ package gapi
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"reflect"
 	"testing"
@@ -14,6 +15,8 @@ import (
 	mockwk "github.com/dubass83/simplebank/worker/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type eqCreateUserTxParamMatcher struct {
@@ -96,6 +99,30 @@ func TestCreateUserGAPI(t *testing.T) {
 				require.Equal(t, user.FullName, createDbUser.FullName)
 				require.Equal(t, user.Email, createDbUser.Email)
 
+			},
+		}, {
+			name: "InternalError",
+			req: &pb.CreateUserRequest{
+				Username: user.Username,
+				Password: password,
+				FullName: user.FullName,
+				Email:    user.Email,
+			},
+			buildStubs: func(store *mockdb.MockStore, taskDistrebutor *mockwk.MockTaskDistributor) {
+				store.EXPECT().
+					CreateUserTx(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return(db.CreateUserTxResult{}, sql.ErrConnDone)
+
+				taskDistrebutor.EXPECT().
+					DestributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, res *pb.CreateUserResponse, err error) {
+				require.Error(t, err)
+				status, ok := status.FromError(err)
+				require.True(t, ok)
+				require.Equal(t, codes.Internal, status.Code())
 			},
 		},
 	}
