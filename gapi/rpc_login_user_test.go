@@ -2,6 +2,7 @@ package gapi
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestLoginUserGAPI(t *testing.T) {
@@ -41,15 +44,6 @@ func TestLoginUserGAPI(t *testing.T) {
 					Times(1).
 					Return(user, nil)
 
-				// arg := &db.CreateSessionParams{
-				// 	ID:           sesionId,
-				// 	Username:     user.Username,
-				// 	RefreshToken: refreshToken,
-				// 	UserAgent:    "",
-				// 	ClientIp:     "",
-				// 	IsBloked:     false,
-				// 	ExpiredAt:    expiredAt,
-				// }
 				store.EXPECT().
 					CreateSession(gomock.Any(), gomock.Any()).
 					Times(1).
@@ -67,108 +61,107 @@ func TestLoginUserGAPI(t *testing.T) {
 			checkResponse: func(t *testing.T, res *pb.LoginUserResponse, err error) {
 				require.NoError(t, err)
 				require.NotNil(t, res)
-				// createDbUser := res.GetUser()
-				// require.Equal(t, user.Username, createDbUser.Username)
-				// require.Equal(t, user.FullName, createDbUser.FullName)
-				// require.Equal(t, user.Email, createDbUser.Email)
+				require.Equal(t, user.Username, res.User.Username)
+				require.Equal(t, user.FullName, res.User.FullName)
+				require.Equal(t, sesionId.String(), res.SessionId)
+			},
+		}, {
+			name: "InternalErrorGetUser",
+			req: &pb.LoginUserRequest{
+				Username: user.Username,
+				Password: password,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
 
+				store.EXPECT().
+					GetUser(gomock.Any(), user.Username).
+					Times(1).
+					Return(db.User{}, sql.ErrConnDone)
+
+				store.EXPECT().
+					CreateSession(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, res *pb.LoginUserResponse, err error) {
+				require.Error(t, err)
+				require.Nil(t, res)
+				st, ok := status.FromError(err)
+				require.True(t, ok)
+				require.Equal(t, st.Code(), codes.Internal)
+			},
+		}, {
+			name: "InternalErrorCreateSession",
+			req: &pb.LoginUserRequest{
+				Username: user.Username,
+				Password: password,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+
+				store.EXPECT().
+					GetUser(gomock.Any(), user.Username).
+					Times(1).
+					Return(user, nil)
+
+				store.EXPECT().
+					CreateSession(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return(db.Session{}, sql.ErrConnDone)
+			},
+			checkResponse: func(t *testing.T, res *pb.LoginUserResponse, err error) {
+				require.Error(t, err)
+				require.Nil(t, res)
+				st, ok := status.FromError(err)
+				require.True(t, ok)
+				require.Equal(t, st.Code(), codes.Internal)
+			},
+		}, {
+			name: "BadInputUsername",
+			req: &pb.LoginUserRequest{
+				Username: "mx",
+				Password: password,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+
+				store.EXPECT().
+					GetUser(gomock.Any(), user.Username).
+					Times(0)
+
+				store.EXPECT().
+					CreateSession(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, res *pb.LoginUserResponse, err error) {
+				require.Error(t, err)
+				require.Nil(t, res)
+				st, ok := status.FromError(err)
+				require.True(t, ok)
+				require.Equal(t, st.Code(), codes.InvalidArgument)
 			},
 		},
-		// {
-		// 	name: "InternalError",
-		// 	req: &pb.LoginUserRequest{
-		// 		Username: user.Username,
-		// 		Password: password,
-		// 		FullName: user.FullName,
-		// 		Email:    user.Email,
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore, taskDistrebutor *mockwk.MockTaskDistributor) {
-		// 		store.EXPECT().
-		// 			LoginUserTx(gomock.Any(), gomock.Any()).
-		// 			Times(1).
-		// 			Return(db.LoginUserTxResult{}, sql.ErrConnDone)
+		{
+			name: "BadInputPassword",
+			req: &pb.LoginUserRequest{
+				Username: user.Username,
+				Password: "",
+			},
+			buildStubs: func(store *mockdb.MockStore) {
 
-		// 		taskDistrebutor.EXPECT().
-		// 			DestributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(t *testing.T, res *pb.LoginUserResponse, err error) {
-		// 		require.Error(t, err)
-		// 		status, ok := status.FromError(err)
-		// 		require.True(t, ok)
-		// 		require.Equal(t, codes.Internal, status.Code())
-		// 	},
-		// }, {
-		// 	name: "AlreadyExists",
-		// 	req: &pb.LoginUserRequest{
-		// 		Username: user.Username,
-		// 		Password: password,
-		// 		FullName: user.FullName,
-		// 		Email:    user.Email,
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore, taskDistrebutor *mockwk.MockTaskDistributor) {
-		// 		store.EXPECT().
-		// 			LoginUserTx(gomock.Any(), gomock.Any()).
-		// 			Times(1).
-		// 			Return(db.LoginUserTxResult{}, db.ErrUniqueViolation)
+				store.EXPECT().
+					GetUser(gomock.Any(), user.Username).
+					Times(0)
 
-		// 		taskDistrebutor.EXPECT().
-		// 			DestributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(t *testing.T, res *pb.LoginUserResponse, err error) {
-		// 		require.Error(t, err)
-		// 		status, ok := status.FromError(err)
-		// 		require.True(t, ok)
-		// 		require.Equal(t, codes.AlreadyExists, status.Code())
-		// 	},
-		// }, {
-		// 	name: "BadInputUsername",
-		// 	req: &pb.LoginUserRequest{
-		// 		Username: "mx",
-		// 		Password: password,
-		// 		FullName: user.FullName,
-		// 		Email:    user.Email,
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore, taskDistrebutor *mockwk.MockTaskDistributor) {
-		// 		store.EXPECT().
-		// 			LoginUserTx(gomock.Any(), gomock.Any()).
-		// 			Times(0)
-
-		// 		taskDistrebutor.EXPECT().
-		// 			DestributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(t *testing.T, res *pb.LoginUserResponse, err error) {
-		// 		require.Error(t, err)
-		// 		status, ok := status.FromError(err)
-		// 		require.True(t, ok)
-		// 		require.Equal(t, codes.InvalidArgument, status.Code())
-		// 	},
-		// }, {
-		// 	name: "BadInputEmail",
-		// 	req: &pb.LoginUserRequest{
-		// 		Username: user.Username,
-		// 		Password: password,
-		// 		FullName: user.FullName,
-		// 		Email:    "someATexampleDotCom",
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore, taskDistrebutor *mockwk.MockTaskDistributor) {
-		// 		store.EXPECT().
-		// 			LoginUserTx(gomock.Any(), gomock.Any()).
-		// 			Times(0)
-
-		// 		taskDistrebutor.EXPECT().
-		// 			DestributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(t *testing.T, res *pb.LoginUserResponse, err error) {
-		// 		require.Error(t, err)
-		// 		status, ok := status.FromError(err)
-		// 		require.True(t, ok)
-		// 		require.Equal(t, codes.InvalidArgument, status.Code())
-		// 	},
-		// },
+				store.EXPECT().
+					CreateSession(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, res *pb.LoginUserResponse, err error) {
+				require.Error(t, err)
+				require.Nil(t, res)
+				st, ok := status.FromError(err)
+				require.True(t, ok)
+				require.Equal(t, st.Code(), codes.InvalidArgument)
+			},
+		},
 	}
 
 	for i := range testCases {
