@@ -37,7 +37,7 @@ func (srv *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (*pb
 		return nil, status.Errorf(codes.Internal, "failed  create access  token")
 	}
 
-	refreshToken, refreshPayload, err := srv.tokenMaker.CreateToken(req.Username, srv.config.RefreshTokenDuration)
+	refreshToken, refreshPayload, err := srv.tokenMaker.CreateToken(req.GetUsername(), srv.config.RefreshTokenDuration)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed create refresh token")
 	}

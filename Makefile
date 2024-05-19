@@ -52,10 +52,10 @@ sqlc:
 	sqlc generate
 
 test:
-	go test -v -cover -short ./...
+	go test -v -cover -count=1 -short ./...
 
 run_test: postgres_up createdb migrate_up
-	go test -v -cover ./...
+	go test -v -cover -count=1 ./...
 
 clean: postgres_down redis_down docker_down
 
@@ -64,6 +64,7 @@ server:
 
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/dubass83/simplebank/db/sqlc Store
+	mockgen -package mockwk -destination worker/mock/distributer.go github.com/dubass83/simplebank/worker TaskDistributor
 
 build:
 	docker build -t simple-bank -f Dockerfile .
