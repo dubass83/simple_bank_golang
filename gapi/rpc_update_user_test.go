@@ -13,12 +13,15 @@ import (
 	"github.com/dubass83/simplebank/util"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestUpdateUserGAPI(t *testing.T) {
 	user, _ := randomUser()
 	newName := util.RandomOwner()
 	newEmail := util.RandomEmail()
+	badEmail := "bad at email.com"
 
 	testCases := []struct {
 		name          string
@@ -71,103 +74,159 @@ func TestUpdateUserGAPI(t *testing.T) {
 				require.Equal(t, newEmail, updateDbUser.Email)
 
 			},
+		}, {
+			name: "InternalError",
+			req: &pb.UpdateUserRequest{
+				Username: user.Username,
+				FullName: &newName,
+				Email:    &newEmail,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.UpdateUserParams{
+					Username: user.Username,
+					FullName: sql.NullString{
+						String: newName,
+						Valid:  true,
+					},
+					Email: sql.NullString{
+						String: newEmail,
+						Valid:  true,
+					},
+				}
+				store.EXPECT().
+					UpdateUser(gomock.Any(), gomock.Eq(arg)).
+					Times(1).
+					Return(db.User{}, sql.ErrConnDone)
+			},
+			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
+				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+			},
+			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
+				require.Error(t, err)
+				status, ok := status.FromError(err)
+				require.True(t, ok)
+				require.Equal(t, codes.Internal, status.Code())
+			},
+		}, {
+			name: "UnauthenticatedError",
+			req: &pb.UpdateUserRequest{
+				Username: user.Username,
+				FullName: &newName,
+				Email:    &newEmail,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					UpdateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
+				return context.Background()
+			},
+			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
+				require.Error(t, err)
+				status, ok := status.FromError(err)
+				require.True(t, ok)
+				require.Equal(t, codes.Unauthenticated, status.Code())
+			},
+		}, {
+			name: "BadEmail",
+			req: &pb.UpdateUserRequest{
+				Username: user.Username,
+				FullName: &newName,
+				Email:    &badEmail,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					UpdateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
+				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+			},
+			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
+				require.Error(t, err)
+				status, ok := status.FromError(err)
+				require.True(t, ok)
+				require.Equal(t, codes.InvalidArgument, status.Code())
+			},
+		}, {
+			name: "BadTokenExpired",
+			req: &pb.UpdateUserRequest{
+				Username: user.Username,
+				FullName: &newName,
+				Email:    &newEmail,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+
+				store.EXPECT().
+					UpdateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
+				return BuildContext(t, tokenMaker, user.Username, -time.Minute)
+			},
+			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
+				require.Error(t, err)
+				status, ok := status.FromError(err)
+				require.True(t, ok)
+				require.Equal(t, codes.Unauthenticated, status.Code())
+			},
+		}, {
+			name: "BadTokenUser",
+			req: &pb.UpdateUserRequest{
+				Username: user.Username,
+				FullName: &newName,
+				Email:    &newEmail,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+
+				store.EXPECT().
+					UpdateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
+				return BuildContext(t, tokenMaker, "dubass83", time.Minute)
+			},
+			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
+				require.Error(t, err)
+				status, ok := status.FromError(err)
+				require.True(t, ok)
+				require.Equal(t, codes.Unauthenticated, status.Code())
+			},
+		}, {
+			name: "NotFoundError",
+			req: &pb.UpdateUserRequest{
+				Username: user.Username,
+				FullName: &newName,
+				Email:    &newEmail,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.UpdateUserParams{
+					Username: user.Username,
+					FullName: sql.NullString{
+						String: newName,
+						Valid:  true,
+					},
+					Email: sql.NullString{
+						String: newEmail,
+						Valid:  true,
+					},
+				}
+				store.EXPECT().
+					UpdateUser(gomock.Any(), gomock.Eq(arg)).
+					Times(1).
+					Return(db.User{}, sql.ErrNoRows)
+			},
+			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
+				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+			},
+			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
+				require.Error(t, err)
+				status, ok := status.FromError(err)
+				require.True(t, ok)
+				require.Equal(t, codes.NotFound, status.Code())
+			},
 		},
-		// {
-		// 	name: "InternalError",
-		// 	req: &pb.UpdateUserRequest{
-		// 		Username: user.Username,
-		// 		Password: password,
-		// 		FullName: user.FullName,
-		// 		Email:    user.Email,
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore, taskDistrebutor *mockwk.MockTaskDistributor) {
-		// 		store.EXPECT().
-		// 			UpdateUserTx(gomock.Any(), gomock.Any()).
-		// 			Times(1).
-		// 			Return(db.UpdateUserTxResult{}, sql.ErrConnDone)
-
-		// 		taskDistrebutor.EXPECT().
-		// 			DestributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
-		// 		require.Error(t, err)
-		// 		status, ok := status.FromError(err)
-		// 		require.True(t, ok)
-		// 		require.Equal(t, codes.Internal, status.Code())
-		// 	},
-		// },
-		// {
-		// 	name: "AlreadyExists",
-		// 	req: &pb.UpdateUserRequest{
-		// 		Username: user.Username,
-		// 		Password: password,
-		// 		FullName: user.FullName,
-		// 		Email:    user.Email,
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore, taskDistrebutor *mockwk.MockTaskDistributor) {
-		// 		store.EXPECT().
-		// 			UpdateUserTx(gomock.Any(), gomock.Any()).
-		// 			Times(1).
-		// 			Return(db.UpdateUserTxResult{}, db.ErrUniqueViolation)
-
-		// 		taskDistrebutor.EXPECT().
-		// 			DestributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
-		// 		require.Error(t, err)
-		// 		status, ok := status.FromError(err)
-		// 		require.True(t, ok)
-		// 		require.Equal(t, codes.AlreadyExists, status.Code())
-		// 	},
-		// }, {
-		// 	name: "BadInputUsername",
-		// 	req: &pb.UpdateUserRequest{
-		// 		Username: "mx",
-		// 		Password: password,
-		// 		FullName: user.FullName,
-		// 		Email:    user.Email,
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore, taskDistrebutor *mockwk.MockTaskDistributor) {
-		// 		store.EXPECT().
-		// 			UpdateUserTx(gomock.Any(), gomock.Any()).
-		// 			Times(0)
-
-		// 		taskDistrebutor.EXPECT().
-		// 			DestributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
-		// 		require.Error(t, err)
-		// 		status, ok := status.FromError(err)
-		// 		require.True(t, ok)
-		// 		require.Equal(t, codes.InvalidArgument, status.Code())
-		// 	},
-		// }, {
-		// 	name: "BadInputEmail",
-		// 	req: &pb.UpdateUserRequest{
-		// 		Username: user.Username,
-		// 		Password: password,
-		// 		FullName: user.FullName,
-		// 		Email:    "someATexampleDotCom",
-		// 	},
-		// 	buildStubs: func(store *mockdb.MockStore, taskDistrebutor *mockwk.MockTaskDistributor) {
-		// 		store.EXPECT().
-		// 			UpdateUserTx(gomock.Any(), gomock.Any()).
-		// 			Times(0)
-
-		// 		taskDistrebutor.EXPECT().
-		// 			DestributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
-		// 		require.Error(t, err)
-		// 		status, ok := status.FromError(err)
-		// 		require.True(t, ok)
-		// 		require.Equal(t, codes.InvalidArgument, status.Code())
-		// 	},
-		// },
 	}
 
 	for i := range testCases {
