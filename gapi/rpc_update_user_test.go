@@ -3,7 +3,6 @@ package gapi
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"testing"
 	"time"
 
@@ -14,7 +13,6 @@ import (
 	"github.com/dubass83/simplebank/util"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc/metadata"
 )
 
 func TestUpdateUserGAPI(t *testing.T) {
@@ -62,16 +60,7 @@ func TestUpdateUserGAPI(t *testing.T) {
 					}, nil)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				ctx := context.Background()
-				token, _, err := tokenMaker.CreateToken(user.Username, time.Minute*15)
-				require.NoError(t, err)
-				barierToken := fmt.Sprintf("%s %s", authType, token)
-				md := metadata.MD{
-					authorizationHeader: []string{
-						barierToken,
-					},
-				}
-				return metadata.NewIncomingContext(ctx, md)
+				return BuildContext(t, tokenMaker, user.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.NoError(t, err)
@@ -107,7 +96,8 @@ func TestUpdateUserGAPI(t *testing.T) {
 		// 		require.True(t, ok)
 		// 		require.Equal(t, codes.Internal, status.Code())
 		// 	},
-		// }, {
+		// },
+		// {
 		// 	name: "AlreadyExists",
 		// 	req: &pb.UpdateUserRequest{
 		// 		Username: user.Username,
