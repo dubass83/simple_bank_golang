@@ -38,11 +38,11 @@ func (srv *Server) CreateTransfer(ctx context.Context, req *pb.CreateTransferTxR
 		return nil, invalidArgumentError(violations)
 	}
 
-	account, err := srv.store.GetAccount(ctx, req.GetFromAccountId())
-	if err != nil {
-		return nil, fmt.Errorf("can not get account from id: %s", err)
-	}
-	if account.Owner != payload.Username {
+	// account, err := srv.store.GetAccount(ctx, req.GetFromAccountId())
+	// if err != nil {
+	// 	return nil, fmt.Errorf("can not get account from id: %s", err)
+	// }
+	if fromAccount.Owner != payload.Username {
 		return nil, fmt.Errorf("user allowed to transfer money only from his account")
 	}
 
