@@ -60,7 +60,7 @@ func TestCreateTransferTxGAPI(t *testing.T) {
 					GetAccount(gomock.Any(), gomock.Eq(frmAccId)).
 					Times(1).
 					Return(fromAccount, nil)
-				tAccId := fromAccount.ID
+				tAccId := toAccount.ID
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(tAccId)).
 					Times(1).
