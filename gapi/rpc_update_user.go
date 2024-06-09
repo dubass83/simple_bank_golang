@@ -2,7 +2,7 @@ package gapi
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -63,7 +63,7 @@ func (srv *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*
 
 	user, err := srv.store.UpdateUser(ctx, arg)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "cannot find user in database: %s", err)
 		}
 		return nil, status.Errorf(codes.Internal, "cannot Update user: %s", err)

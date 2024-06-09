@@ -1,7 +1,6 @@
 package api
 
 import (
-	"database/sql"
 	"errors"
 	"net/http"
 
@@ -59,7 +58,7 @@ func (srv *Server) getAccount(ctx *gin.Context) {
 
 	account, err := srv.store.GetAccount(ctx, req.Id)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -135,7 +134,7 @@ func (srv *Server) updateAccount(ctx *gin.Context) {
 
 	account, err := srv.store.UpdateAccount(ctx, arg)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -159,7 +158,7 @@ func (srv *Server) deleteAccount(ctx *gin.Context) {
 
 	err = srv.store.DeleteAccount(ctx, reqUri.Id)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}

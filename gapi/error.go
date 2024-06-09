@@ -1,9 +1,10 @@
 package gapi
 
 import (
-	"database/sql"
+	"errors"
 	"fmt"
 
+	db "github.com/dubass83/simplebank/db/sqlc"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -33,7 +34,7 @@ func unauthenticatedError(err error) error {
 }
 
 func cannotGetAccountError(err error) error {
-	if err == sql.ErrNoRows {
+	if errors.Is(err, db.ErrRecordNotFound) {
 		return fmt.Errorf("account not found: %s", err)
 	}
 	return fmt.Errorf("cannot get Account: %s", err)
