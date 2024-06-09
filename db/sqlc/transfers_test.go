@@ -2,10 +2,10 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 
 	"github.com/dubass83/simplebank/util"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,11 +14,11 @@ func createRandomTransfer(t *testing.T) Transfer {
 	account2 := createRandomAccount(t)
 
 	arg := CreateTransferParams{
-		FromAccountID: sql.NullInt64{
+		FromAccountID: pgtype.Int8{
 			Int64: account1.ID,
 			Valid: true,
 		},
-		ToAccountID: sql.NullInt64{
+		ToAccountID: pgtype.Int8{
 			Int64: account2.ID,
 			Valid: true,
 		},

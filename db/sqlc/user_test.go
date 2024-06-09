@@ -2,11 +2,11 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
 	"github.com/dubass83/simplebank/util"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 )
 
@@ -59,7 +59,7 @@ func TestUpdateUserFullName(t *testing.T) {
 
 	userUpdated, err := TestQueries.UpdateUser(context.Background(), UpdateUserParams{
 		Username: userOld.Username,
-		FullName: sql.NullString{
+		FullName: pgtype.Text{
 			String: newFullName,
 			Valid:  true,
 		},
@@ -76,7 +76,7 @@ func TestUpdateUserEmail(t *testing.T) {
 
 	userUpdated, err := TestQueries.UpdateUser(context.Background(), UpdateUserParams{
 		Username: userOld.Username,
-		Email: sql.NullString{
+		Email: pgtype.Text{
 			String: newEmail,
 			Valid:  true,
 		},
@@ -94,7 +94,7 @@ func TestUpdateUserHashedPassword(t *testing.T) {
 
 	userUpdated, err := TestQueries.UpdateUser(context.Background(), UpdateUserParams{
 		Username: userOld.Username,
-		HashedPassword: sql.NullString{
+		HashedPassword: pgtype.Text{
 			String: hp,
 			Valid:  true,
 		},
@@ -114,15 +114,15 @@ func TestUpdateUserHashedAll(t *testing.T) {
 
 	userUpdated, err := TestQueries.UpdateUser(context.Background(), UpdateUserParams{
 		Username: userOld.Username,
-		HashedPassword: sql.NullString{
+		HashedPassword: pgtype.Text{
 			String: hp,
 			Valid:  true,
 		},
-		Email: sql.NullString{
+		Email: pgtype.Text{
 			String: newEmail,
 			Valid:  true,
 		},
-		FullName: sql.NullString{
+		FullName: pgtype.Text{
 			String: newFullName,
 			Valid:  true,
 		},

@@ -5,10 +5,9 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Account struct {
@@ -20,28 +19,28 @@ type Account struct {
 }
 
 type Entry struct {
-	ID        int64         `json:"id"`
-	AccountID sql.NullInt64 `json:"accountId"`
+	ID        int64       `json:"id"`
+	AccountID pgtype.Int8 `json:"accountId"`
 	// can be negative or posetive
 	Amount    int64     `json:"amount"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
 type Session struct {
-	ID           uuid.UUID `json:"id"`
-	Username     string    `json:"username"`
-	RefreshToken string    `json:"refreshToken"`
-	UserAgent    string    `json:"userAgent"`
-	ClientIp     string    `json:"clientIp"`
-	IsBloked     bool      `json:"isBloked"`
-	ExpiredAt    time.Time `json:"expiredAt"`
-	CreatedAt    time.Time `json:"createdAt"`
+	ID           pgtype.UUID `json:"id"`
+	Username     string      `json:"username"`
+	RefreshToken string      `json:"refreshToken"`
+	UserAgent    string      `json:"userAgent"`
+	ClientIp     string      `json:"clientIp"`
+	IsBloked     bool        `json:"isBloked"`
+	ExpiredAt    time.Time   `json:"expiredAt"`
+	CreatedAt    time.Time   `json:"createdAt"`
 }
 
 type Transfer struct {
-	ID            int64         `json:"id"`
-	FromAccountID sql.NullInt64 `json:"fromAccountId"`
-	ToAccountID   sql.NullInt64 `json:"toAccountId"`
+	ID            int64       `json:"id"`
+	FromAccountID pgtype.Int8 `json:"fromAccountId"`
+	ToAccountID   pgtype.Int8 `json:"toAccountId"`
 	// should be posetive
 	Amount    int64     `json:"amount"`
 	CreatedAt time.Time `json:"createdAt"`
