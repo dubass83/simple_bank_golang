@@ -21,7 +21,7 @@ func createRandomUser(t *testing.T) User {
 		FullName:       util.RandomOwner(),
 		Email:          util.RandomEmail(),
 	}
-	user, err := TestQueries.CreateUser(context.Background(), arg)
+	user, err := testStore.CreateUser(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
 
@@ -41,7 +41,7 @@ func TestCreateUser(t *testing.T) {
 
 func TestGetUser(t *testing.T) {
 	user1 := createRandomUser(t)
-	user2, err := TestQueries.GetUser(context.Background(), user1.Username)
+	user2, err := testStore.GetUser(context.Background(), user1.Username)
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
 
@@ -57,7 +57,7 @@ func TestUpdateUserFullName(t *testing.T) {
 	userOld := createRandomUser(t)
 	newFullName := util.RandomOwner()
 
-	userUpdated, err := TestQueries.UpdateUser(context.Background(), UpdateUserParams{
+	userUpdated, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: userOld.Username,
 		FullName: pgtype.Text{
 			String: newFullName,
@@ -74,7 +74,7 @@ func TestUpdateUserEmail(t *testing.T) {
 	userOld := createRandomUser(t)
 	newEmail := util.RandomEmail()
 
-	userUpdated, err := TestQueries.UpdateUser(context.Background(), UpdateUserParams{
+	userUpdated, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: userOld.Username,
 		Email: pgtype.Text{
 			String: newEmail,
@@ -92,7 +92,7 @@ func TestUpdateUserHashedPassword(t *testing.T) {
 	hp, err := util.HashPassword(util.RandomString(8))
 	require.NoError(t, err)
 
-	userUpdated, err := TestQueries.UpdateUser(context.Background(), UpdateUserParams{
+	userUpdated, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: userOld.Username,
 		HashedPassword: pgtype.Text{
 			String: hp,
@@ -112,7 +112,7 @@ func TestUpdateUserHashedAll(t *testing.T) {
 	hp, err := util.HashPassword(util.RandomString(8))
 	require.NoError(t, err)
 
-	userUpdated, err := TestQueries.UpdateUser(context.Background(), UpdateUserParams{
+	userUpdated, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: userOld.Username,
 		HashedPassword: pgtype.Text{
 			String: hp,

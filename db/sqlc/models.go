@@ -7,6 +7,7 @@ package db
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -27,14 +28,14 @@ type Entry struct {
 }
 
 type Session struct {
-	ID           pgtype.UUID `json:"id"`
-	Username     string      `json:"username"`
-	RefreshToken string      `json:"refreshToken"`
-	UserAgent    string      `json:"userAgent"`
-	ClientIp     string      `json:"clientIp"`
-	IsBloked     bool        `json:"isBloked"`
-	ExpiredAt    time.Time   `json:"expiredAt"`
-	CreatedAt    time.Time   `json:"createdAt"`
+	ID           uuid.UUID `json:"id"`
+	Username     string    `json:"username"`
+	RefreshToken string    `json:"refreshToken"`
+	UserAgent    string    `json:"userAgent"`
+	ClientIp     string    `json:"clientIp"`
+	IsBloked     bool      `json:"isBloked"`
+	ExpiredAt    time.Time `json:"expiredAt"`
+	CreatedAt    time.Time `json:"createdAt"`
 }
 
 type Transfer struct {

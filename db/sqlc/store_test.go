@@ -8,7 +8,6 @@ import (
 )
 
 func TestTransferTx(t *testing.T) {
-	store := NewStore(TestDb)
 
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
@@ -22,7 +21,7 @@ func TestTransferTx(t *testing.T) {
 	for i := 0; i < n; i++ {
 		go func() {
 			ctx := context.Background()
-			result, err := store.TransferTx(ctx, TransferTxParams{
+			result, err := testStore.TransferTx(ctx, TransferTxParams{
 				FromAccountID: account1.ID,
 				ToAccountID:   account2.ID,
 				Ammount:       ammount,
@@ -81,9 +80,9 @@ func TestTransferTx(t *testing.T) {
 		existed[k] = true
 	}
 
-	updatedAccount1, err := TestQueries.GetAccount(context.Background(), account1.ID)
+	updatedAccount1, err := testStore.GetAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
-	updatedAccount2, err := TestQueries.GetAccount(context.Background(), account2.ID)
+	updatedAccount2, err := testStore.GetAccount(context.Background(), account2.ID)
 	require.NoError(t, err)
 
 	require.Equal(t, account1.Balance-int64(n)*ammount, updatedAccount1.Balance)
@@ -91,7 +90,6 @@ func TestTransferTx(t *testing.T) {
 }
 
 func TestDeadlockInTransferTx(t *testing.T) {
-	store := NewStore(TestDb)
 
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
@@ -110,7 +108,7 @@ func TestDeadlockInTransferTx(t *testing.T) {
 		}
 		go func() {
 			ctx := context.Background()
-			_, err := store.TransferTx(ctx, TransferTxParams{
+			_, err := testStore.TransferTx(ctx, TransferTxParams{
 				FromAccountID: fromAccountID,
 				ToAccountID:   toAccountID,
 				Ammount:       ammount,
@@ -125,9 +123,9 @@ func TestDeadlockInTransferTx(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	updatedAccount1, err := TestQueries.GetAccount(context.Background(), account1.ID)
+	updatedAccount1, err := testStore.GetAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
-	updatedAccount2, err := TestQueries.GetAccount(context.Background(), account2.ID)
+	updatedAccount2, err := testStore.GetAccount(context.Background(), account2.ID)
 	require.NoError(t, err)
 
 	require.Equal(t, account1.Balance, updatedAccount1.Balance)
