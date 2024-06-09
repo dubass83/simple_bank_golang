@@ -2,10 +2,10 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 
 	"github.com/dubass83/simplebank/util"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,18 +14,18 @@ func createRandomTransfer(t *testing.T) Transfer {
 	account2 := createRandomAccount(t)
 
 	arg := CreateTransferParams{
-		FromAccountID: sql.NullInt64{
+		FromAccountID: pgtype.Int8{
 			Int64: account1.ID,
 			Valid: true,
 		},
-		ToAccountID: sql.NullInt64{
+		ToAccountID: pgtype.Int8{
 			Int64: account2.ID,
 			Valid: true,
 		},
 		Amount: util.RandomMoney(),
 	}
 
-	transfer, err := TestQueries.CreateTransfer(context.Background(), arg)
+	transfer, err := testStore.CreateTransfer(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, transfer)
 
@@ -43,7 +43,7 @@ func TestCreateTransfer(t *testing.T) {
 func TestGetTransfer(t *testing.T) {
 	transfer1 := createRandomTransfer(t)
 
-	transfer2, err := TestQueries.GetTransfer(context.Background(), transfer1.ID)
+	transfer2, err := testStore.GetTransfer(context.Background(), transfer1.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, transfer2)
 
@@ -61,7 +61,7 @@ func TestUpdateTransfer(t *testing.T) {
 		Amount: util.RandomMoney(),
 	}
 
-	transfer2, err := TestQueries.UpdateTransfer(context.Background(), arg)
+	transfer2, err := testStore.UpdateTransfer(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, transfer2)
 
@@ -73,10 +73,10 @@ func TestUpdateTransfer(t *testing.T) {
 func TestDeleteTransfer(t *testing.T) {
 	transfer1 := createRandomTransfer(t)
 
-	err := TestQueries.DeleteTransfer(context.Background(), transfer1.ID)
+	err := testStore.DeleteTransfer(context.Background(), transfer1.ID)
 	require.NoError(t, err)
 
-	transfer2, err := TestQueries.GetTransfer(context.Background(), transfer1.ID)
+	transfer2, err := testStore.GetTransfer(context.Background(), transfer1.ID)
 	require.Error(t, err)
 	require.Empty(t, transfer2)
 }
@@ -91,7 +91,7 @@ func TestListTransfers(t *testing.T) {
 		Offset: 5,
 	}
 
-	transfers, err := TestQueries.ListTransfers(context.Background(), arg)
+	transfers, err := testStore.ListTransfers(context.Background(), arg)
 	require.NoError(t, err)
 
 	for _, transfer := range transfers {

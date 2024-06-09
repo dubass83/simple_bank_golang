@@ -1,14 +1,12 @@
 package api
 
 import (
-	"database/sql"
 	"errors"
 	"net/http"
 
 	db "github.com/dubass83/simplebank/db/sqlc"
 	"github.com/dubass83/simplebank/token"
 	"github.com/gin-gonic/gin"
-	"github.com/lib/pq"
 )
 
 type createAccountRequest struct {
@@ -32,12 +30,9 @@ func (srv *Server) createAccount(ctx *gin.Context) {
 
 	account, err := srv.store.CreateAccount(ctx, arg)
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
-			switch pqErr.Code.Name() {
-			case "foregin_key_violation", "unique_violation":
-				ctx.JSON(http.StatusForbidden, errorResponse(err))
-				return
-			}
+		if db.ErrorCode(err) == db.UniqueViolation || db.ErrorCode(err) == db.ForeignKeyViolation {
+			ctx.JSON(http.StatusForbidden, errorResponse(err))
+			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -59,7 +54,7 @@ func (srv *Server) getAccount(ctx *gin.Context) {
 
 	account, err := srv.store.GetAccount(ctx, req.Id)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -135,7 +130,7 @@ func (srv *Server) updateAccount(ctx *gin.Context) {
 
 	account, err := srv.store.UpdateAccount(ctx, arg)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -159,7 +154,7 @@ func (srv *Server) deleteAccount(ctx *gin.Context) {
 
 	err = srv.store.DeleteAccount(ctx, reqUri.Id)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}

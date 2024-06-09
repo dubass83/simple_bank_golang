@@ -7,7 +7,8 @@ package db
 
 import (
 	"context"
-	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -27,7 +28,7 @@ type CreateUserParams struct {
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser,
+	row := q.db.QueryRow(ctx, createUser,
 		arg.Username,
 		arg.HashedPassword,
 		arg.FullName,
@@ -52,7 +53,7 @@ WHERE username = $1 LIMIT 1
 `
 
 func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUser, username)
+	row := q.db.QueryRow(ctx, getUser, username)
 	var i User
 	err := row.Scan(
 		&i.Username,
@@ -80,16 +81,16 @@ RETURNING username, hashed_password, full_name, email, password_changed_at, crea
 `
 
 type UpdateUserParams struct {
-	HashedPassword    sql.NullString `json:"hashedPassword"`
-	FullName          sql.NullString `json:"fullName"`
-	Email             sql.NullString `json:"email"`
-	IsEmailVerified   sql.NullBool   `json:"isEmailVerified"`
-	PasswordChangedAt sql.NullTime   `json:"passwordChangedAt"`
-	Username          string         `json:"username"`
+	HashedPassword    pgtype.Text        `json:"hashedPassword"`
+	FullName          pgtype.Text        `json:"fullName"`
+	Email             pgtype.Text        `json:"email"`
+	IsEmailVerified   pgtype.Bool        `json:"isEmailVerified"`
+	PasswordChangedAt pgtype.Timestamptz `json:"passwordChangedAt"`
+	Username          string             `json:"username"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, updateUser,
+	row := q.db.QueryRow(ctx, updateUser,
 		arg.HashedPassword,
 		arg.FullName,
 		arg.Email,

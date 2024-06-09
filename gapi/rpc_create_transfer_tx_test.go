@@ -13,6 +13,7 @@ import (
 	"github.com/dubass83/simplebank/token"
 	"github.com/dubass83/simplebank/util"
 	"github.com/golang/mock/gomock"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -75,11 +76,11 @@ func TestCreateTransferTxGAPI(t *testing.T) {
 				}
 				transfer := db.Transfer{
 					ID: 1,
-					FromAccountID: sql.NullInt64{
+					FromAccountID: pgtype.Int8{
 						Int64: fromAccount.ID,
 						Valid: true,
 					},
-					ToAccountID: sql.NullInt64{
+					ToAccountID: pgtype.Int8{
 						Int64: toAccount.ID,
 						Valid: true,
 					},
@@ -88,7 +89,7 @@ func TestCreateTransferTxGAPI(t *testing.T) {
 				}
 				fromEntry := db.Entry{
 					ID: 1,
-					AccountID: sql.NullInt64{
+					AccountID: pgtype.Int8{
 						Int64: fromAccount.ID,
 						Valid: true,
 					},
@@ -97,7 +98,7 @@ func TestCreateTransferTxGAPI(t *testing.T) {
 				}
 				toEntry := db.Entry{
 					ID: 1,
-					AccountID: sql.NullInt64{
+					AccountID: pgtype.Int8{
 						Int64: toAccount.ID,
 						Valid: true,
 					},

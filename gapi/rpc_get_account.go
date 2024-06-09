@@ -2,8 +2,9 @@ package gapi
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 
+	db "github.com/dubass83/simplebank/db/sqlc"
 	"github.com/dubass83/simplebank/pb"
 	"github.com/dubass83/simplebank/val"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -23,7 +24,7 @@ func (srv *Server) GetAccount(ctx context.Context, req *pb.GetAccountRequest) (*
 
 	Account, err := srv.store.GetAccount(ctx, req.GetId())
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "account not found: %s", err)
 		}
 		return nil, status.Errorf(codes.Internal, "cannot get Account: %s", err)

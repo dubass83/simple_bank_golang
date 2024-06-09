@@ -2,10 +2,10 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 
 	"github.com/dubass83/simplebank/util"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,14 +13,14 @@ func createRandomEntry(t *testing.T) Entry {
 	account1 := createRandomAccount(t)
 
 	arg := CreateEntryParams{
-		AccountID: sql.NullInt64{
+		AccountID: pgtype.Int8{
 			Int64: account1.ID,
 			Valid: true,
 		},
 		Amount: util.RandomMoney(),
 	}
 
-	entry, err := TestQueries.CreateEntry(context.Background(), arg)
+	entry, err := testStore.CreateEntry(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, entry)
 
@@ -36,7 +36,7 @@ func TestCreateEntry(t *testing.T) {
 func TestGetEntry(t *testing.T) {
 	entry1 := createRandomEntry(t)
 
-	entry2, err := TestQueries.GetEntry(context.Background(), entry1.ID)
+	entry2, err := testStore.GetEntry(context.Background(), entry1.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, entry2)
 
@@ -54,7 +54,7 @@ func TestUpdateEntry(t *testing.T) {
 		Amount: util.RandomMoney(),
 	}
 
-	entry2, err := TestQueries.UpdateEntry(context.Background(), arg)
+	entry2, err := testStore.UpdateEntry(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, entry2)
 
@@ -65,10 +65,10 @@ func TestUpdateEntry(t *testing.T) {
 func TestDeleteEntry(t *testing.T) {
 	entry1 := createRandomEntry(t)
 
-	err := TestQueries.DeleteEntry(context.Background(), entry1.ID)
+	err := testStore.DeleteEntry(context.Background(), entry1.ID)
 	require.NoError(t, err)
 
-	entry2, err := TestQueries.GetEntry(context.Background(), entry1.ID)
+	entry2, err := testStore.GetEntry(context.Background(), entry1.ID)
 	require.Error(t, err)
 	require.Empty(t, entry2)
 }
@@ -83,7 +83,7 @@ func TestListEtries(t *testing.T) {
 		Offset: 5,
 	}
 
-	entries, err := TestQueries.ListEntries(context.Background(), arg)
+	entries, err := testStore.ListEntries(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, entries, 5)
 

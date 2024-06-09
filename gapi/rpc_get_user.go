@@ -2,9 +2,10 @@ package gapi
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 	"fmt"
 
+	db "github.com/dubass83/simplebank/db/sqlc"
 	"github.com/dubass83/simplebank/pb"
 	"github.com/dubass83/simplebank/val"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -30,7 +31,7 @@ func (srv *Server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.Get
 	}
 	user, err := srv.store.GetUser(ctx, req.GetUsername())
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "user not found: %s", err)
 		}
 		return nil, status.Errorf(codes.Internal, "cannot get user: %s", err)
