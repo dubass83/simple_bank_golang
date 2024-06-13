@@ -139,13 +139,13 @@ func (srv *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	token, accessPayload, err := srv.tokenMaker.CreateToken(req.Username, srv.config.TokenDuration)
+	token, accessPayload, err := srv.tokenMaker.CreateToken(req.Username, user.Role, srv.config.TokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	refreshToken, refreshPayload, err := srv.tokenMaker.CreateToken(req.Username, srv.config.RefreshTokenDuration)
+	refreshToken, refreshPayload, err := srv.tokenMaker.CreateToken(req.Username, user.Role, srv.config.RefreshTokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

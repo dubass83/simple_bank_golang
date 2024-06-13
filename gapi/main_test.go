@@ -25,9 +25,9 @@ func NewTestServer(t *testing.T, store db.Store, taskDistributor worker.TaskDist
 	return server
 }
 
-func BuildContext(t *testing.T, tokenMaker token.Maker, username string, duration time.Duration) context.Context {
+func BuildContext(t *testing.T, tokenMaker token.Maker, username string, role string, duration time.Duration) context.Context {
 	ctx := context.Background()
-	token, _, err := tokenMaker.CreateToken(username, duration)
+	token, _, err := tokenMaker.CreateToken(username, role, duration)
 	require.NoError(t, err)
 	barierToken := fmt.Sprintf("%s %s", authType, token)
 	md := metadata.MD{

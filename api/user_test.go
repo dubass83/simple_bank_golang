@@ -62,7 +62,7 @@ func TestGetUserAPI(t *testing.T) {
 			name:     "OK",
 			username: user.Username,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				AddAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+				AddAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -83,7 +83,7 @@ func TestGetUserAPI(t *testing.T) {
 			name:     "NotFound",
 			username: "notFound",
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				AddAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+				AddAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -99,7 +99,7 @@ func TestGetUserAPI(t *testing.T) {
 			name:     "BadRequest",
 			username: "b@du$#r",
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				AddAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+				AddAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -114,7 +114,7 @@ func TestGetUserAPI(t *testing.T) {
 			name:     "InternalServerError",
 			username: user.Username,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				AddAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+				AddAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, user.Role, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -293,6 +293,7 @@ func randomUser() (db.User, string) {
 
 	user := db.User{
 		Username:       util.RandomOwner(),
+		Role:           util.DepositorRole,
 		HashedPassword: hash,
 		FullName:       util.RandomOwner(),
 		Email:          util.RandomEmail(),

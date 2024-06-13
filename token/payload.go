@@ -11,6 +11,7 @@ import (
 var (
 	ErrInvalidToken = errors.New("token is unverifiable: error while executing keyfunc: unexpected signing method: none")
 	ErrExpiredToken = errors.New("token has invalid claims: token is expired")
+	// ErrGetJwtAudString = errors.New("token has invalid claims: Aud key is missing")
 )
 
 // Payload contain a data of the token

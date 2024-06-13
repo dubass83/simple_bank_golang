@@ -117,7 +117,7 @@ func TestCreateTransferTxGAPI(t *testing.T) {
 					}, nil)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user1.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user1.Username, user1.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.CreateTransferTxResponse, err error) {
 				require.NoError(t, err)
@@ -144,7 +144,7 @@ func TestCreateTransferTxGAPI(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user1.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user1.Username, user1.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.CreateTransferTxResponse, err error) {
 				require.Error(t, err)
@@ -174,7 +174,7 @@ func TestCreateTransferTxGAPI(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user1.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user1.Username, user1.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.CreateTransferTxResponse, err error) {
 				require.Error(t, err)
@@ -210,7 +210,7 @@ func TestCreateTransferTxGAPI(t *testing.T) {
 					Return(db.TransferTxResult{}, sql.ErrConnDone)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user1.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user1.Username, user1.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.CreateTransferTxResponse, err error) {
 				require.Error(t, err)
@@ -238,7 +238,7 @@ func TestCreateTransferTxGAPI(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user1.Username, -time.Minute)
+				return BuildContext(t, tokenMaker, user1.Username, user1.Role, -time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.CreateTransferTxResponse, err error) {
 				require.Error(t, err)
@@ -271,7 +271,7 @@ func TestCreateTransferTxGAPI(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user2.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user2.Username, user2.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.CreateTransferTxResponse, err error) {
 				require.Error(t, err)
@@ -302,7 +302,7 @@ func TestCreateTransferTxGAPI(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user1.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user1.Username, user1.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.CreateTransferTxResponse, err error) {
 				require.Error(t, err)

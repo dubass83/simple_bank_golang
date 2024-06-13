@@ -53,7 +53,7 @@ func TestCreateAccountGAPI(t *testing.T) {
 					}, nil)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.CreateAccountResponse, err error) {
 				require.NoError(t, err)
@@ -81,7 +81,7 @@ func TestCreateAccountGAPI(t *testing.T) {
 					Return(db.Account{}, sql.ErrConnDone)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.CreateAccountResponse, err error) {
 				require.Error(t, err)
@@ -101,7 +101,7 @@ func TestCreateAccountGAPI(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, -time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, -time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.CreateAccountResponse, err error) {
 				require.Error(t, err)
@@ -121,7 +121,7 @@ func TestCreateAccountGAPI(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.CreateAccountResponse, err error) {
 				require.Error(t, err)
@@ -147,7 +147,7 @@ func TestCreateAccountGAPI(t *testing.T) {
 					Return(db.Account{}, db.ErrUniqueViolation)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.CreateAccountResponse, err error) {
 				require.Error(t, err)
