@@ -26,7 +26,7 @@ func (srv *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*
 		return nil, invalidArgumentError(violation)
 	}
 
-	if payload.Username != req.GetUsername() {
+	if payload.Role != util.BankerRole && payload.Username != req.GetUsername() {
 		err := fmt.Errorf("user: %s is not authorized to make changes in another user: %s",
 			payload.Username,
 			req.GetUsername(),

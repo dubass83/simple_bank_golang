@@ -50,7 +50,7 @@ func TestDeleteAccount(t *testing.T) {
 					Return(nil)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponce: func(t *testing.T, res *pb.DeleteAccountResponse, err error) {
 				require.NotNil(t, res)
@@ -71,7 +71,7 @@ func TestDeleteAccount(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponce: func(t *testing.T, res *pb.DeleteAccountResponse, err error) {
 				require.Nil(t, res)
@@ -95,7 +95,7 @@ func TestDeleteAccount(t *testing.T) {
 					Return(sql.ErrConnDone)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponce: func(t *testing.T, res *pb.DeleteAccountResponse, err error) {
 				require.Nil(t, res)
@@ -118,7 +118,7 @@ func TestDeleteAccount(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponce: func(t *testing.T, res *pb.DeleteAccountResponse, err error) {
 				require.Nil(t, res)
@@ -141,7 +141,7 @@ func TestDeleteAccount(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, "dubass83", time.Minute)
+				return BuildContext(t, tokenMaker, "dubass83", util.DepositorRole, time.Minute)
 			},
 			checkResponce: func(t *testing.T, res *pb.DeleteAccountResponse, err error) {
 				require.Nil(t, res)
@@ -163,7 +163,7 @@ func TestDeleteAccount(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, -time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, -time.Minute)
 			},
 			checkResponce: func(t *testing.T, res *pb.DeleteAccountResponse, err error) {
 				require.Nil(t, res)
@@ -185,7 +185,7 @@ func TestDeleteAccount(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponce: func(t *testing.T, res *pb.DeleteAccountResponse, err error) {
 				require.Nil(t, res)

@@ -11,18 +11,20 @@ import (
 var (
 	ErrInvalidToken = errors.New("token is unverifiable: error while executing keyfunc: unexpected signing method: none")
 	ErrExpiredToken = errors.New("token has invalid claims: token is expired")
+	// ErrGetJwtAudString = errors.New("token has invalid claims: Aud key is missing")
 )
 
 // Payload contain a data of the token
 type Payload struct {
 	ID        uuid.UUID `json:"id"`
 	Username  string    `json:"username"`
+	Role      string    `json:"role"`
 	IssuedAt  time.Time `json:"issued_at"`
 	ExpiredAt time.Time `json:"expired_at"`
 }
 
 // NewPayload get username and duration and create new token payload
-func NewPayload(username string, duration time.Duration) (*Payload, error) {
+func NewPayload(username string, role string, duration time.Duration) (*Payload, error) {
 	tokenID, err := uuid.NewV4()
 	if err != nil {
 		return nil, err
@@ -30,6 +32,7 @@ func NewPayload(username string, duration time.Duration) (*Payload, error) {
 	payload := &Payload{
 		ID:        tokenID,
 		Username:  username,
+		Role:      role,
 		IssuedAt:  time.Now(),
 		ExpiredAt: time.Now().Add(duration),
 	}

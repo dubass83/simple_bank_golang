@@ -40,7 +40,7 @@ func TestGetUser(t *testing.T) {
 					Return(user, nil)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponce: func(t *testing.T, res *pb.GetUserResponse, err error) {
 				require.NoError(t, err)
@@ -62,7 +62,7 @@ func TestGetUser(t *testing.T) {
 					Return(db.User{}, sql.ErrConnDone)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponce: func(t *testing.T, res *pb.GetUserResponse, err error) {
 				require.Error(t, err)
@@ -82,7 +82,7 @@ func TestGetUser(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, -time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, -time.Minute)
 			},
 			checkResponce: func(t *testing.T, res *pb.GetUserResponse, err error) {
 				require.Error(t, err)
@@ -102,7 +102,7 @@ func TestGetUser(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, badUser, time.Minute)
+				return BuildContext(t, tokenMaker, badUser, user.Role, time.Minute)
 			},
 			checkResponce: func(t *testing.T, res *pb.GetUserResponse, err error) {
 				require.Error(t, err)
@@ -128,7 +128,7 @@ func TestGetUser(t *testing.T) {
 					Return(db.User{}, db.ErrRecordNotFound)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponce: func(t *testing.T, res *pb.GetUserResponse, err error) {
 				require.Error(t, err)
@@ -148,7 +148,7 @@ func TestGetUser(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, badUser, time.Minute)
+				return BuildContext(t, tokenMaker, badUser, user.Role, time.Minute)
 			},
 			checkResponce: func(t *testing.T, res *pb.GetUserResponse, err error) {
 				require.Error(t, err)

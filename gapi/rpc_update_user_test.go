@@ -64,7 +64,7 @@ func TestUpdateUserGAPI(t *testing.T) {
 					}, nil)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.NoError(t, err)
@@ -100,7 +100,7 @@ func TestUpdateUserGAPI(t *testing.T) {
 					Return(db.User{}, sql.ErrConnDone)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
@@ -142,7 +142,7 @@ func TestUpdateUserGAPI(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
@@ -164,7 +164,7 @@ func TestUpdateUserGAPI(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, -time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, -time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
@@ -186,7 +186,7 @@ func TestUpdateUserGAPI(t *testing.T) {
 					Times(0)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, "dubass83", time.Minute)
+				return BuildContext(t, tokenMaker, "dubass83", user.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
@@ -219,7 +219,7 @@ func TestUpdateUserGAPI(t *testing.T) {
 					Return(db.User{}, db.ErrRecordNotFound)
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return BuildContext(t, tokenMaker, user.Username, time.Minute)
+				return BuildContext(t, tokenMaker, user.Username, user.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)

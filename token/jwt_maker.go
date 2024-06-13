@@ -23,8 +23,8 @@ func NewJwtMaker(secretKey string) (Maker, error) {
 }
 
 // CreateToken create new token for username and duration
-func (maker JwtMaker) CreateToken(username string, duration time.Duration) (string, *Payload, error) {
-	payload, err := NewPayload(username, duration)
+func (maker JwtMaker) CreateToken(username string, role string, duration time.Duration) (string, *Payload, error) {
+	payload, err := NewPayload(username, role, duration)
 	if err != nil {
 		return "", payload, err
 	}
@@ -32,6 +32,7 @@ func (maker JwtMaker) CreateToken(username string, duration time.Duration) (stri
 	claim := &jwt.RegisteredClaims{
 		ID:        payload.ID.String(),
 		Subject:   payload.Username,
+		Audience:  jwt.ClaimStrings{payload.Role},
 		IssuedAt:  jwt.NewNumericDate(payload.IssuedAt),
 		ExpiresAt: jwt.NewNumericDate(payload.ExpiredAt),
 	}
@@ -86,9 +87,14 @@ func (maker JwtMaker) VerifyToken(tokenString string) (*Payload, error) {
 		texp = time.Unix(v, 0)
 	}
 
+	role, err := claims.GetAudience()
+	if err != nil {
+		return nil, err
+	}
 	return &Payload{
 		ID:        uuid.Must(uuid.FromString(claims["jti"].(string))),
 		Username:  claims["sub"].(string),
+		Role:      role[0],
 		IssuedAt:  tiat,
 		ExpiredAt: texp,
 	}, nil

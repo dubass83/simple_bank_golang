@@ -55,6 +55,7 @@ type User struct {
 	PasswordChangedAt time.Time `json:"passwordChangedAt"`
 	CreatedAt         time.Time `json:"createdAt"`
 	IsEmailVerified   bool      `json:"isEmailVerified"`
+	Role              string    `json:"role"`
 }
 
 type VerifyEmail struct {
