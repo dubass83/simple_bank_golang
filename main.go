@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"net"
 	"net/http"
 	"os"
@@ -160,6 +161,9 @@ func runGateWayServer(
 		log.Info().Msgf("start Gateway server at %s", httpServer.Addr)
 		err = httpServer.ListenAndServe()
 		if err != nil {
+			if errors.Is(err, http.ErrServerClosed) {
+				return nil
+			}
 			log.Error().
 				Err(err).
 				Str("method", "main").
@@ -247,6 +251,9 @@ func runGRPCServer(
 		log.Info().Msgf("start gRPC server on port %s", listener.Addr().String())
 		err = grpcServer.Serve(listener)
 		if err != nil {
+			if errors.Is(err, grpc.ErrServerStopped) {
+				return nil
+			}
 			log.Error().
 				Err(err).
 				Str("method", "main").
