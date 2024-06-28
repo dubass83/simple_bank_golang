@@ -10,6 +10,7 @@ import (
 	"github.com/dubass83/simplebank/val"
 	"github.com/dubass83/simplebank/worker"
 	"github.com/hibiken/asynq"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -44,6 +45,8 @@ func (srv *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*
 			return srv.taskDestributor.DestributeTaskSendVerifyEmail(ctx, payload, opts...)
 		},
 	}
+	log.Info().Msg(">> start creating user")
+	time.Sleep(time.Second * 10)
 
 	userTx, err := srv.store.CreateUserTx(ctx, arg)
 	if err != nil {
@@ -52,7 +55,7 @@ func (srv *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*
 		}
 		return nil, status.Errorf(codes.Internal, "cannot create user: %s", err)
 	}
-
+	log.Info().Msg(">> user created")
 	rsp := &pb.CreateUserResponse{
 		User: convertUser(userTx.User),
 	}
